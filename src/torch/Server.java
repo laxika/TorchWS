@@ -6,10 +6,13 @@ import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import java.util.HashMap;
+import torch.handler.WebPageHandler;
 
 public class Server {
 
     private final int port;
+    private static final HashMap<String, WebPageHandler> container = new HashMap<>();
 
     public Server(int port) {
         this.port = port;
@@ -22,9 +25,7 @@ public class Server {
         
         try {
             ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(new ServerInitializer());
+            b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).childHandler(new ServerInitializer(container));
 
             Channel ch = b.bind(port).sync().channel();
             ch.closeFuture().sync();
@@ -33,15 +34,8 @@ public class Server {
             workerGroup.shutdownGracefully();
         }
     }
-
-    public static void main(String[] args) throws Exception {
-        int port;
-        if (args.length > 0) {
-            port = Integer.parseInt(args[0]);
-        } else {
-            port = 8080;
-        }
-
-        new Server(port).run();
+    
+    public HashMap<String, WebPageHandler> getRouter() {
+        return container;
     }
 }
