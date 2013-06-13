@@ -9,8 +9,8 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import static io.netty.handler.codec.http.HttpHeaders.Names.*;
 import io.netty.handler.codec.http.HttpRequest;
-import static io.netty.handler.codec.http.HttpResponseStatus.*;
-import static io.netty.handler.codec.http.HttpVersion.*;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.CharsetUtil;
 import java.util.HashMap;
 import torch.handler.WebPageHandler;
@@ -29,7 +29,7 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
     public void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof HttpRequest) {
             HttpRequest request = (HttpRequest) msg;
-            
+
             //Handle the message
             TorchHttpResponse response = new TorchHttpResponse();
             TorchHttpRequest torchreq = new TorchHttpRequest(request);
@@ -37,33 +37,33 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
             if (container.containsKey(request.getUri())) {
                 container.get(request.getUri()).handle(torchreq, response);
             } else {
-                //404
+                response.setStatus(HttpResponseStatus.NOT_FOUND);
             }
 
             writeResponse(ctx, response, HttpHeaders.isKeepAlive(request));
         }
     }
-    
+
     private void writeResponse(ChannelHandlerContext ctx, TorchHttpResponse response, boolean keepAlive) {
-            FullHttpResponse fullresponse = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
+        FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
 
-            fullresponse.headers().set(CONTENT_TYPE, "text/html; charset=UTF-8");
+        fullresponse.headers().set(CONTENT_TYPE, response.getContentType());
 
-            if (keepAlive) {
-                // Add 'Content-Length' header only for a keep-alive connection.
-                fullresponse.headers().set(CONTENT_LENGTH, fullresponse.content().readableBytes());
-                // Add keep alive header as per:
-                // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
-                fullresponse.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-            }
+        if (keepAlive) {
+            // Add 'Content-Length' header only for a keep-alive connection.
+            fullresponse.headers().set(CONTENT_LENGTH, fullresponse.content().readableBytes());
+            // Add keep alive header as per:
+            // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
+            fullresponse.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+        }
 
-            // Write the response.
-            ctx.nextOutboundMessageBuffer().add(fullresponse);
+        // Write the response.
+        ctx.nextOutboundMessageBuffer().add(fullresponse);
 
-            // Close the non-keep-alive connection after the write operation is done.
-            if (!keepAlive) {
-                ctx.flush().addListener(ChannelFutureListener.CLOSE);
-            }
+        // Close the non-keep-alive connection after the write operation is done.
+        if (!keepAlive) {
+            ctx.flush().addListener(ChannelFutureListener.CLOSE);
+        }
     }
 
     @Override

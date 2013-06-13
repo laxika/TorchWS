@@ -8,7 +8,7 @@ public class Test extends WebPageHandler{
 
     @Override
     public void handle(TorchHttpRequest request, TorchHttpResponse response) {
-        response.appendContent("hellow world");
+        response.appendContent("hello world");
     }
     
 }
