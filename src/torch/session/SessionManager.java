@@ -12,9 +12,11 @@ public class SessionManager {
     }
     
     public Session startNewSession() {
-        String sessionId = generator.nextSessionId();
+        Session session = new Session(generator.nextSessionId());
         
-        return sessions.put(sessionId, new Session(sessionId));
+        sessions.put(session.getSessionId(), session);
+        
+        return session;
     }
     
 }
