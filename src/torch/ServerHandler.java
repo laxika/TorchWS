@@ -11,8 +11,11 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.*;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import torch.handler.WebPageHandler;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
@@ -55,6 +58,11 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
             // Add keep alive header as per:
             // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
             fullresponse.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+        }
+
+        //Setting the new cookies
+        for (Map.Entry<String, String> pairs : response.getNewCookieData().entrySet()) {
+            fullresponse.headers().add(SET_COOKIE, ServerCookieEncoder.encode(pairs.getKey(), pairs.getValue()));
         }
 
         // Write the response.

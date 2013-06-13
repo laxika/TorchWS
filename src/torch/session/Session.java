@@ -1,13 +1,14 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package torch.session;
 
-/**
- *
- * @author laxika
- */
 public class Session {
     
+    private final String sessionId;
+    
+    public Session(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
 }
