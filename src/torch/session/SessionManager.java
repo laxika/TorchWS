@@ -1,13 +1,22 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package torch.session;
 
-/**
- *
- * @author laxika
- */
+import java.util.HashMap;
+
 public class SessionManager {
+
+    private HashMap<String, Session> sessions = new HashMap<>();
+    private SessionIdentifierGenerator generator = new SessionIdentifierGenerator();
+    
+    public Session getSession(String sessid) {
+        return sessions.get(sessid);
+    }
+    
+    public Session startNewSession() {
+        Session session = new Session(generator.nextSessionId());
+        
+        sessions.put(session.getSessionId(), session);
+        
+        return session;
+    }
     
 }
