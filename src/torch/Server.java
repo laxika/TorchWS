@@ -6,13 +6,12 @@ import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import java.util.HashMap;
-import torch.handler.WebPageHandler;
+import torch.router.RouteManager;
 
 public class Server {
 
     private final int port;
-    private static final HashMap<String, WebPageHandler> container = new HashMap<>();
+    private static final RouteManager container = new RouteManager();
 
     public Server(int port) {
         this.port = port;
@@ -35,7 +34,7 @@ public class Server {
         }
     }
     
-    public HashMap<String, WebPageHandler> getRouter() {
+    public RouteManager getRouteManager() {
         return container;
     }
 }

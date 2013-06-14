@@ -12,17 +12,16 @@ import io.netty.handler.codec.http.HttpRequest;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.*;
 import io.netty.util.CharsetUtil;
-import java.util.HashMap;
-import torch.handler.WebPageHandler;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
+import torch.router.RouteManager;
 
 public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
 
-    private final HashMap<String, WebPageHandler> container;
+    private final RouteManager routes;
 
-    public ServerHandler(HashMap<String, WebPageHandler> container) {
-        this.container = container;
+    public ServerHandler(RouteManager container) {
+        this.routes = container;
     }
 
     @Override
@@ -34,8 +33,8 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
             TorchHttpResponse response = new TorchHttpResponse();
             TorchHttpRequest torchreq = new TorchHttpRequest(request);
 
-            if (container.containsKey(request.getUri())) {
-                container.get(request.getUri()).handle(torchreq, response);
+            if (routes.getRouteTarget(request.getUri()) != null) {
+                routes.getRouteTarget(request.getUri()).handle(torchreq, response);
             } else {
                 //404
             }

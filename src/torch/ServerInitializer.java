@@ -6,13 +6,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
-import java.util.HashMap;
+import torch.router.RouteManager;
 
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     
-    private HashMap container = null;
+    private RouteManager container = null;
     
-    public ServerInitializer(HashMap container) {
+    public ServerInitializer(RouteManager container) {
         this.container = container;
     }
     
