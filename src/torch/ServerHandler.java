@@ -14,6 +14,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
 import java.util.Map;
+import torch.handler.WebPage;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
 import torch.router.RouteManager;
@@ -34,9 +35,10 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
             //Handle the message
             TorchHttpResponse response = new TorchHttpResponse();
             TorchHttpRequest torchreq = new TorchHttpRequest(request);
-
-            if (routes.getRouteTarget(request.getUri()) != null) {
-                routes.getRouteTarget(request.getUri()).handle(torchreq, response);
+            
+            WebPage target = routes.getRouteTarget(request);
+            if (target != null) {
+                routes.getRouteTarget(request).handle(torchreq, response);
             } else {
                 response.setStatus(HttpResponseStatus.NOT_FOUND);
             }
