@@ -38,8 +38,9 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
             
             WebPage target = routes.getRouteTarget(request);
             if (target != null) {
-                routes.getRouteTarget(request).handle(torchreq, response);
+                target.handle(torchreq, response);
             } else {
+                response.appendContent("404 Not Found!");
                 response.setStatus(HttpResponseStatus.NOT_FOUND);
             }
 

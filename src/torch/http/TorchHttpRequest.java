@@ -22,8 +22,6 @@ public class TorchHttpRequest extends HttpBase {
 
         String cookieString = request.headers().get(COOKIE);
 
-        System.out.println(cookieString);
-
         if (cookieString != null) {
             Set<Cookie> cookies = CookieDecoder.decode(cookieString);
 

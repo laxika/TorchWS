@@ -18,7 +18,7 @@ public class RouteManager {
 
         int targetId = routingTargets.indexOf(target);
 
-        for (int i = 0; i < routeHops.length; i++) {
+        for (int i = 1; i < routeHops.length; i++) {
             if (routeHops[i].startsWith("@")) {
                 //Dynamic route hop
                 dynamicRouteHops.get(i).add(targetId);
@@ -37,10 +37,10 @@ public class RouteManager {
         String routeUri = route.getUri();
 
         String[] routeHops = routeUri.split("/");
-        
-        ArrayList<Integer> possibleTargets = new ArrayList<>();
 
-        for (int i = 0; i < routeHops.length; i++) {
+        ArrayList<Integer> possibleTargets = null;
+
+        for (int i = 1; i < routeHops.length; i++) {
             if (routeHops[i].startsWith("@")) {
                 //Dynamic route hop
                 possibleTargets = keepSameItems(possibleTargets, dynamicRouteHops.get(i));
@@ -49,23 +49,31 @@ public class RouteManager {
                 possibleTargets = keepSameItems(possibleTargets, staticRouteHops.get(routeHops[i] + "_" + i));
             }
         }
-        
-        if(possibleTargets.size() > 0) {
+
+        if (possibleTargets.size() > 0) {
             return routingTargets.get(possibleTargets.get(0));
         }
 
         return null;
     }
-    
-    public ArrayList<Integer> keepSameItems(ArrayList<Integer> first, ArrayList<Integer> second) {
-        ArrayList<Integer> result = new ArrayList<>();
+
+    private ArrayList<Integer> keepSameItems(ArrayList<Integer> first, ArrayList<Integer> second) {
+        if (first == null) {
+            return second;
+        }
         
-        for(Integer i : first) {
-            if(second.contains(i)) {
+        if (second == null) {
+            return first;
+        }
+        
+        ArrayList<Integer> result = new ArrayList<>();
+
+        for (Integer i : first) {
+            if (second.contains(i)) {
                 result.add(i);
             }
         }
-        
+
         return result;
     }
 }
