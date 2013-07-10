@@ -13,7 +13,7 @@ public class RouteManager {
 
     public void addRoute(String route, WebPage target) {
         String[] routeHops = route.split("/");
-        
+
         Route routeToAdd = new Route(route, routeHops.length, target);
 
         routingTargets.add(routeToAdd);
@@ -47,20 +47,21 @@ public class RouteManager {
         ArrayList<Integer> possibleTargets = null;
 
         for (int i = 1; i < routeHops.length; i++) {
-            //ToDO!!! ITT EGY LOGIKAI HIBA VAN! Ha van dynemic és nem dynamic is, és a nem dnamic van előbb akkor az kiüti 
-            //a dynamicot. Ezt egy kicsit másképp kell megcsinálni!!!
-            if (routeHops[i].startsWith("@")) {
-                //Dynamic route hop
-                possibleTargets = keepSameItems(possibleTargets, dynamicRouteHops.get(i));
-            } else {
-                //Static route hop
-                System.out.println(staticRouteHops.get(routeHops[i] + "_" + i));
-                possibleTargets = keepSameItems(possibleTargets, staticRouteHops.get(routeHops[i] + "_" + i));
+            //Merging all the possibilities then remove the not possible routes from the merged ones.
+            ArrayList<Integer> possibleTargetsAtThisLevel = new ArrayList<>();
+
+            if (dynamicRouteHops.containsKey(i)) {
+                possibleTargetsAtThisLevel.addAll(dynamicRouteHops.get(i));
             }
+            if (staticRouteHops.containsKey(routeHops[i] + "_" + i)) {
+                possibleTargetsAtThisLevel.addAll(staticRouteHops.get(routeHops[i] + "_" + i));
+            }
+
+            possibleTargets = keepSameItems(possibleTargets, possibleTargetsAtThisLevel);
         }
 
         //Have result
-        if (possibleTargets != null) {
+        if (possibleTargets != null && possibleTargets.size() > 0) {
             Route target = routingTargets.get(possibleTargets.get(0));
             System.out.println(target.getRoutingUri());
 
