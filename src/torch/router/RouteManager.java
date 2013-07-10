@@ -60,10 +60,23 @@ public class RouteManager {
             possibleTargets = keepSameItems(possibleTargets, possibleTargetsAtThisLevel);
         }
 
-        //Have result
+        //Have result, calculate the one we need from the possible routes
         if (possibleTargets != null && possibleTargets.size() > 0) {
             Route target = routingTargets.get(possibleTargets.get(0));
-            System.out.println(target.getRoutingUri());
+                    
+            for(int act :possibleTargets) {
+                Route actTarget = routingTargets.get(act);
+                
+                //Exact match
+                if(actTarget.getDynamicVariableCount() == 0) {
+                    return actTarget.getTarget();
+                }
+                
+                //Smalles dynamic route wins
+                if(actTarget.getDynamicVariableCount() < target.getDynamicVariableCount()) {
+                    target = actTarget;
+                }
+            }
 
             if (target.getHopCount() == routeHops.length) {
                 return target.getTarget();
