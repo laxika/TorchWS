@@ -1,6 +1,5 @@
 package torch.router;
 
-import io.netty.handler.codec.http.HttpRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import torch.handler.WebPage;
@@ -39,9 +38,7 @@ public class RouteManager {
         }
     }
 
-    public WebPage getRouteTarget(HttpRequest route) {
-        String routeUri = route.getUri();
-
+    public WebPage getRouteTarget(String routeUri) {
         String[] routeHops = routeUri.split("/");
 
         ArrayList<Integer> possibleTargets = null;

@@ -36,7 +36,7 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
             TorchHttpResponse response = new TorchHttpResponse();
             TorchHttpRequest torchreq = new TorchHttpRequest(request);
             
-            WebPage target = routes.getRouteTarget(request);
+            WebPage target = routes.getRouteTarget(request.getUri());
             if (target != null) {
                 target.handle(torchreq, response);
             } else {
@@ -82,7 +82,7 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
+        cause.printStackTrace(System.out);
         ctx.close();
     }
 }
