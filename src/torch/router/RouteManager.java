@@ -3,13 +3,20 @@ package torch.router;
 import java.util.ArrayList;
 import java.util.HashMap;
 import torch.handler.WebPage;
+import torch.util.ArrayUtils;
 
 public class RouteManager {
 
-    private final HashMap<String, ArrayList<Integer>> staticRouteHops = new HashMap<>();
-    private final HashMap<Integer, ArrayList<Integer>> dynamicRouteHops = new HashMap<>();
+    private final HashMap<String, ArrayList<Integer>> staticRouteParts = new HashMap<>();
+    private final HashMap<Integer, ArrayList<Integer>> dynamicRouteParts = new HashMap<>();
     private final ArrayList<Route> routingTargets = new ArrayList<>();
 
+    /**
+     * Add a new route to the defined routes.
+     *
+     * @param route the uri of the route
+     * @param target the target of the route
+     */
     public void addRoute(String route, WebPage target) {
         String[] routeHops = route.split("/");
 
@@ -17,60 +24,65 @@ public class RouteManager {
 
         routingTargets.add(routeToAdd);
 
-        int targetId = routingTargets.indexOf(routeToAdd);
-
         for (int i = 1; i < routeHops.length; i++) {
-            if (routeHops[i].startsWith("@")) {
-                //Dynamic route hop
-                if (!dynamicRouteHops.containsKey(i)) {
-                    dynamicRouteHops.put(i, new ArrayList<Integer>());
-                }
-
-                dynamicRouteHops.get(i).add(targetId);
-            } else {
-                //Static route hop
-                if (!staticRouteHops.containsKey(routeHops[i] + "_" + i)) {
-                    staticRouteHops.put(routeHops[i] + "_" + i, new ArrayList<Integer>());
-                }
-
-                staticRouteHops.get(routeHops[i] + "_" + i).add(targetId);
-            }
+            addNewRoutePart(routeHops[i], i, routingTargets.indexOf(routeToAdd));
         }
     }
 
+    /**
+     * Add a new url part to the routing manager.
+     *
+     * @param part the url part
+     * @param partPosition the position of the part in the uri
+     * @param targetId the target webpage of the url
+     */
+    private void addNewRoutePart(String part, int partPosition, int urlTargetId) {
+        if (part.startsWith("@")) {
+            //Dynamic route hop
+            if (!dynamicRouteParts.containsKey(partPosition)) {
+                dynamicRouteParts.put(partPosition, new ArrayList<Integer>());
+            }
+
+            dynamicRouteParts.get(partPosition).add(urlTargetId);
+        } else {
+            //Static route hop
+            if (!staticRouteParts.containsKey(part + "_" + partPosition)) {
+                staticRouteParts.put(part + "_" + partPosition, new ArrayList<Integer>());
+            }
+
+            staticRouteParts.get(part + "_" + partPosition).add(urlTargetId);
+        }
+    }
+
+    /**
+     * Get a target webpage of a route.
+     *
+     * @param routeUri the url of the route
+     * @return the target or null if no target found
+     */
     public WebPage getRouteTarget(String routeUri) {
         String[] routeHops = routeUri.split("/");
 
         ArrayList<Integer> possibleTargets = null;
 
-        for (int i = 1; i < routeHops.length; i++) {
-            //Merging all the possibilities then remove the not possible routes from the merged ones.
-            ArrayList<Integer> possibleTargetsAtThisLevel = new ArrayList<>();
-
-            if (dynamicRouteHops.containsKey(i)) {
-                possibleTargetsAtThisLevel.addAll(dynamicRouteHops.get(i));
-            }
-            if (staticRouteHops.containsKey(routeHops[i] + "_" + i)) {
-                possibleTargetsAtThisLevel.addAll(staticRouteHops.get(routeHops[i] + "_" + i));
-            }
-
-            possibleTargets = keepSameItems(possibleTargets, possibleTargetsAtThisLevel);
+        for (int level = 1; level < routeHops.length; level++) {
+            possibleTargets = recalculatePossibleTargetsAtLevel(level, routeHops[level], possibleTargets);
         }
 
         //Have result, calculate the one we need from the possible routes
         if (possibleTargets != null && possibleTargets.size() > 0) {
             Route target = routingTargets.get(possibleTargets.get(0));
-                    
-            for(int act :possibleTargets) {
+
+            for (int act : possibleTargets) {
                 Route actTarget = routingTargets.get(act);
-                
+
                 //Exact match
-                if(actTarget.getDynamicVariableCount() == 0) {
+                if (actTarget.getDynamicVariableCount() == 0) {
                     return actTarget.getTarget();
                 }
-                
+
                 //Smalles dynamic route wins
-                if(actTarget.getDynamicVariableCount() < target.getDynamicVariableCount()) {
+                if (actTarget.getDynamicVariableCount() < target.getDynamicVariableCount()) {
                     target = actTarget;
                 }
             }
@@ -83,23 +95,20 @@ public class RouteManager {
         return null;
     }
 
-    private ArrayList<Integer> keepSameItems(ArrayList<Integer> first, ArrayList<Integer> second) {
-        if (first == null) {
-            return second;
+    private ArrayList<Integer> recalculatePossibleTargetsAtLevel(int level, String part, ArrayList<Integer> possibleTargets) {
+        ArrayList<Integer> possibleTargetsAtThisLevel = new ArrayList<>();
+
+        if (dynamicRouteParts.containsKey(level)) {
+            possibleTargetsAtThisLevel.addAll(dynamicRouteParts.get(level));
+        }
+        if (staticRouteParts.containsKey(part + "_" + level)) {
+            possibleTargetsAtThisLevel.addAll(staticRouteParts.get(part + "_" + level));
         }
 
-        if (second == null) {
-            return first;
+        if (possibleTargets == null) {
+            return possibleTargetsAtThisLevel;
+        } else {
+            return (ArrayList) ArrayUtils.intersection(possibleTargets, possibleTargetsAtThisLevel);
         }
-
-        ArrayList<Integer> result = new ArrayList<>();
-
-        for (Integer i : first) {
-            if (second.contains(i)) {
-                result.add(i);
-            }
-        }
-
-        return result;
     }
 }
