@@ -1,14 +1,15 @@
-package torch.router;
+package torch.route;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import torch.handler.WebPage;
+import torch.route.container.DynamicRouteContainer;
+import torch.route.container.StaticRouteContainer;
 import torch.util.ArrayUtils;
 
 public class RouteManager {
 
-    private final HashMap<String, ArrayList<Integer>> staticRouteParts = new HashMap<>();
-    private final HashMap<Integer, ArrayList<Integer>> dynamicRouteParts = new HashMap<>();
+    private final StaticRouteContainer staticRouteContainer = new StaticRouteContainer();
+    private final DynamicRouteContainer dynamicRouteContainer = new DynamicRouteContainer();
     private final ArrayList<Route> routingTargets = new ArrayList<>();
 
     /**
@@ -24,8 +25,8 @@ public class RouteManager {
 
         routingTargets.add(routeToAdd);
 
-        for (int i = 1; i < routeHops.length; i++) {
-            addNewRoutePart(routeHops[i], i, routingTargets.indexOf(routeToAdd));
+        for (int level = 1; level < routeHops.length; level++) {
+            addNewRoutePart(routeHops[level], level, routingTargets.indexOf(routeToAdd));
         }
     }
 
@@ -36,21 +37,11 @@ public class RouteManager {
      * @param partPosition the position of the part in the uri
      * @param targetId the target webpage of the url
      */
-    private void addNewRoutePart(String part, int partPosition, int urlTargetId) {
+    private void addNewRoutePart(String part, int level, int urlTargetId) {
         if (part.startsWith("@")) {
-            //Dynamic route hop
-            if (!dynamicRouteParts.containsKey(partPosition)) {
-                dynamicRouteParts.put(partPosition, new ArrayList<Integer>());
-            }
-
-            dynamicRouteParts.get(partPosition).add(urlTargetId);
+            dynamicRouteContainer.addRoutePart(level, urlTargetId);
         } else {
-            //Static route hop
-            if (!staticRouteParts.containsKey(part + "_" + partPosition)) {
-                staticRouteParts.put(part + "_" + partPosition, new ArrayList<Integer>());
-            }
-
-            staticRouteParts.get(part + "_" + partPosition).add(urlTargetId);
+            staticRouteContainer.addRoutePart(part, level, urlTargetId);
         }
     }
 
@@ -98,12 +89,8 @@ public class RouteManager {
     private ArrayList<Integer> recalculatePossibleTargetsAtLevel(int level, String part, ArrayList<Integer> possibleTargets) {
         ArrayList<Integer> possibleTargetsAtThisLevel = new ArrayList<>();
 
-        if (dynamicRouteParts.containsKey(level)) {
-            possibleTargetsAtThisLevel.addAll(dynamicRouteParts.get(level));
-        }
-        if (staticRouteParts.containsKey(part + "_" + level)) {
-            possibleTargetsAtThisLevel.addAll(staticRouteParts.get(part + "_" + level));
-        }
+        possibleTargetsAtThisLevel.addAll(dynamicRouteContainer.getRoutePartPossibleTargets(level));
+        possibleTargetsAtThisLevel.addAll(staticRouteContainer.getRoutePartPossibleTargets(part, level));
 
         if (possibleTargets == null) {
             return possibleTargetsAtThisLevel;

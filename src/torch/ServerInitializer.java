@@ -6,7 +6,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
-import torch.router.RouteManager;
+import torch.route.RouteManager;
 
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     

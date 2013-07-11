@@ -1,5 +1,6 @@
 package torch.router;
 
+import torch.route.RouteManager;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import torch.example.routing.HelloWorldExactRoute;
