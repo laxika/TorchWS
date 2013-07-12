@@ -10,7 +10,6 @@ public class RouteManager {
 
     private final StaticRouteContainer staticRouteContainer = new StaticRouteContainer();
     private final DynamicRouteContainer dynamicRouteContainer = new DynamicRouteContainer();
-    private final ArrayList<Route> routingTargets = new ArrayList<>();
 
     /**
      * Add a new route to the defined routes.
@@ -21,12 +20,8 @@ public class RouteManager {
     public void addRoute(String route, WebPage target) {
         String[] routeHops = route.split("/");
 
-        Route routeToAdd = new Route(route, routeHops.length, target);
-
-        routingTargets.add(routeToAdd);
-
         for (int level = 1; level < routeHops.length; level++) {
-            addNewRoutePart(routeHops[level], level, routingTargets.indexOf(routeToAdd));
+            addNewRoutePart(routeHops[level], level, new Route(route, routeHops.length, target));
         }
     }
 
@@ -37,11 +32,11 @@ public class RouteManager {
      * @param partPosition the position of the part in the uri
      * @param targetId the target webpage of the url
      */
-    private void addNewRoutePart(String part, int level, int urlTargetId) {
+    private void addNewRoutePart(String part, int level, Route route) {
         if (part.startsWith("@")) {
-            dynamicRouteContainer.addRoutePart(level, urlTargetId);
+            dynamicRouteContainer.addRoutePart(level, route);
         } else {
-            staticRouteContainer.addRoutePart(part, level, urlTargetId);
+            staticRouteContainer.addRoutePart(part, level, route);
         }
     }
 
@@ -54,7 +49,7 @@ public class RouteManager {
     public WebPage getRouteTarget(String routeUri) {
         String[] routeHops = routeUri.split("/");
 
-        ArrayList<Integer> possibleTargets = null;
+        ArrayList<Route> possibleTargets = null;
 
         for (int level = 1; level < routeHops.length; level++) {
             possibleTargets = recalculatePossibleTargetsAtLevel(level, routeHops[level], possibleTargets);
@@ -62,10 +57,9 @@ public class RouteManager {
 
         //Have result, calculate the one we need from the possible routes
         if (possibleTargets != null && possibleTargets.size() > 0) {
-            Route target = routingTargets.get(possibleTargets.get(0));
+            Route target = possibleTargets.get(0);
 
-            for (int act : possibleTargets) {
-                Route actTarget = routingTargets.get(act);
+            for (Route actTarget : possibleTargets) {
 
                 //Exact match
                 if (actTarget.getDynamicVariableCount() == 0) {
@@ -86,8 +80,8 @@ public class RouteManager {
         return null;
     }
 
-    private ArrayList<Integer> recalculatePossibleTargetsAtLevel(int level, String part, ArrayList<Integer> possibleTargets) {
-        ArrayList<Integer> possibleTargetsAtThisLevel = new ArrayList<>();
+    private ArrayList<Route> recalculatePossibleTargetsAtLevel(int level, String part, ArrayList<Route> possibleTargets) {
+        ArrayList<Route> possibleTargetsAtThisLevel = new ArrayList<>();
 
         possibleTargetsAtThisLevel.addAll(dynamicRouteContainer.getRoutePartPossibleTargets(level));
         possibleTargetsAtThisLevel.addAll(staticRouteContainer.getRoutePartPossibleTargets(part, level));

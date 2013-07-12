@@ -1,6 +1,7 @@
 package torch.route;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import torch.handler.WebPage;
 
 public class Route {
@@ -45,5 +46,17 @@ public class Route {
 
     public ArrayList<Integer> getDynamicVariablePositions() {
         return dynamicVariablePositions;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 53 * hash + Objects.hashCode(routingUri);
+        return hash;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Route && ((Route) o).routingUri.equals(this.routingUri);
     }
 }
