@@ -9,7 +9,7 @@ public class HelloWorldWithOneVar extends WebPage {
 
     @Override
     public void handle(TorchHttpRequest request, TorchHttpResponse response) {
-        response.appendContent("This is a route with one variable!");
+        response.appendContent("This is a route with one variable! The value of the lonely variable is: "+request.getUrlVariable("variable1"));
     }
 
 }
