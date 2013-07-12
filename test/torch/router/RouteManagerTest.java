@@ -23,9 +23,9 @@ public class RouteManagerTest {
         
         testTarget.addRoute("/hello/@variable/@variable2/", page);
         
-        assert testTarget.getRouteTarget("/hello/var1/var2").equals(page) : "Dynamic variable test 1";
-        assert testTarget.getRouteTarget("/hello/lol") == null : "Dynamic variable test 2";
-        assert testTarget.getRouteTarget("/var1/var2/var3") == null : "Dynamic variable test 3";
+        assert testTarget.getRouteByUrl("/hello/var1/var2").getTarget().equals(page) : "Dynamic variable test 1";
+        assert testTarget.getRouteByUrl("/hello/lol") == null : "Dynamic variable test 2";
+        assert testTarget.getRouteByUrl("/var1/var2/var3") == null : "Dynamic variable test 3";
     }
     
     @Test
@@ -38,8 +38,8 @@ public class RouteManagerTest {
         testTarget.addRoute("/hello/@variable/lol/", page2);
         testTarget.addRoute("/hello/exact/route", page3);
         
-        assert testTarget.getRouteTarget("/hello/exact/route").equals(page3) : "Priority test 1";
-        assert testTarget.getRouteTarget("/hello/var1/var2/").equals(page1) : "Priority test 2";
-        assert testTarget.getRouteTarget("/hello/var1/lol/").equals(page2) : "Priority test 3";
+        assert testTarget.getRouteByUrl("/hello/exact/route").getTarget().equals(page3) : "Priority test 1";
+        assert testTarget.getRouteByUrl("/hello/var1/var2/").getTarget().equals(page1) : "Priority test 2";
+        assert testTarget.getRouteByUrl("/hello/var1/lol/").getTarget().equals(page2) : "Priority test 3";
     }
 }

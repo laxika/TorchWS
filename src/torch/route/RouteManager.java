@@ -41,12 +41,12 @@ public class RouteManager {
     }
 
     /**
-     * Get a target webpage of a route.
+     * Get the best matching route for the uri.
      *
      * @param routeUri the url of the route
      * @return the target or null if no target found
      */
-    public WebPage getRouteTarget(String routeUri) {
+    public Route getRouteByUrl(String routeUri) {
         String[] routeHops = routeUri.split("/");
 
         ArrayList<Route> possibleTargets = null;
@@ -63,7 +63,7 @@ public class RouteManager {
 
                 //Exact match
                 if (actTarget.getDynamicVariableCount() == 0) {
-                    return actTarget.getTarget();
+                    return actTarget;
                 }
 
                 //Smalles dynamic route wins
@@ -73,7 +73,7 @@ public class RouteManager {
             }
 
             if (target.getHopCount() == routeHops.length) {
-                return target.getTarget();
+                return target;
             }
         }
 
