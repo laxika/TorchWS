@@ -19,4 +19,8 @@ public class SessionManager {
         return session;
     }
     
+    public void removeSessionById(String sessionId) {
+        sessions.remove(sessionId);
+    }
+    
 }
