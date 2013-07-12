@@ -14,6 +14,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
 import java.util.Map;
+import torch.http.RequestMethod;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
 import torch.route.Route;
@@ -31,8 +32,8 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
     public void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof HttpRequest) {
             HttpRequest request = (HttpRequest) msg;
-
-            Route target = routes.calculateRouteByUrl(request.getUri());
+            
+            Route target = routes.calculateRouteByUrl(request.getUri(),RequestMethod.getMethodByNettyMethod(request.getMethod()));
             
             //Handle the message
             TorchHttpResponse response = new TorchHttpResponse();

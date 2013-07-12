@@ -1,7 +1,9 @@
 package torch.route;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import torch.handler.WebPage;
+import torch.http.RequestMethod;
 import torch.route.container.DynamicRouteContainer;
 import torch.route.container.StaticRouteContainer;
 import torch.util.ArrayUtils;
@@ -11,17 +13,21 @@ public class RouteManager {
     private final StaticRouteContainer staticRouteContainer = new StaticRouteContainer();
     private final DynamicRouteContainer dynamicRouteContainer = new DynamicRouteContainer();
 
+    public void defineRoute(String route, WebPage target) {
+        defineRoute(route, target, RequestMethod.GET);
+    }
+
     /**
      * Add a new route to the defined routes.
      *
      * @param route the uri of the route
      * @param target the target of the route
      */
-    public void defineRoute(String route, WebPage target) {
+    public void defineRoute(String route, WebPage target, RequestMethod method) {
         String[] routeHops = route.split("/");
 
         for (int level = 1; level < routeHops.length; level++) {
-            addNewRoutePart(routeHops[level], level, new Route(route, target));
+            addNewRoutePart(routeHops[level], level, new Route(route, method, target));
         }
     }
 
@@ -29,19 +35,33 @@ public class RouteManager {
      * Calculate the best matching route for the uri.
      *
      * @param routeUri the url of the route
+     * @param method the method of the request
      * @return the target or null if no target found
      */
-    public Route calculateRouteByUrl(String routeUri) {
+    public Route calculateRouteByUrl(String routeUri, RequestMethod method) {
         String[] routeHops = routeUri.split("/");
 
         ArrayList<Route> possibleTargets = null;
 
+        //Check the request url
         for (int level = 1; level < routeHops.length; level++) {
             possibleTargets = recalculatePossibleTargetsAtLevel(level, routeHops[level], possibleTargets);
         }
+        
+        if(possibleTargets == null) {
+            return null;
+        }
+
+        Iterator<Route> it = possibleTargets.iterator();
+        while (it.hasNext()) {
+            Route route = it.next();
+            if (route.getMethod() != method) {
+                it.remove();
+            }
+        }
 
         //Have result, calculate the one we need from the possible routes
-        if (possibleTargets != null && possibleTargets.size() > 0) {
+        if (possibleTargets.size() > 0) {
             Route target = possibleTargets.get(0);
 
             for (Route actTarget : possibleTargets) {

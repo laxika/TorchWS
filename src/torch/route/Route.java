@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import torch.handler.WebPage;
+import torch.http.RequestMethod;
 
 public class Route {
 
@@ -13,12 +14,14 @@ public class Route {
     private final String[] routingHops;
     private final int dynamicVariableCount;
     private final ArrayList<Integer> dynamicVariablePositions = new ArrayList<>();
+    private final RequestMethod method;
 
-    public Route(String routingUri, WebPage target) {
+    public Route(String routingUri, RequestMethod method, WebPage target) {
         this.routingUri = routingUri;
         this.target = target;
         this.routingHops = routingUri.split("/");
         this.hopCount = routingHops.length;
+        this.method = method;
 
         for (int i = 0; i < routingHops.length; i++) {
             if (routingHops[i].startsWith("@")) {
@@ -36,6 +39,10 @@ public class Route {
 
     public WebPage getTarget() {
         return target;
+    }
+    
+    public RequestMethod getMethod() {
+        return method;
     }
 
     public String getRoutingUri() {
