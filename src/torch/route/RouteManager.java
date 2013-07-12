@@ -21,7 +21,7 @@ public class RouteManager {
         String[] routeHops = route.split("/");
 
         for (int level = 1; level < routeHops.length; level++) {
-            addNewRoutePart(routeHops[level], level, new Route(route, routeHops.length, target));
+            addNewRoutePart(routeHops[level], level, new Route(route, target));
         }
     }
 

@@ -1,6 +1,7 @@
 package torch.route;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 import torch.handler.WebPage;
 
@@ -13,16 +14,17 @@ public class Route {
     private final int dynamicVariableCount;
     private final ArrayList<Integer> dynamicVariablePositions = new ArrayList<>();
 
-    public Route(String routingUri, int hopCount, WebPage target) {
+    public Route(String routingUri, WebPage target) {
         this.routingUri = routingUri;
-        this.hopCount = hopCount;
         this.target = target;
         this.routingHops = routingUri.split("/");
+        this.hopCount = routingHops.length;
 
         for (int i = 0; i < routingHops.length; i++) {
             if (routingHops[i].startsWith("@")) {
                 dynamicVariablePositions.add(i);
             }
+            routingHops[i] = routingHops[i].startsWith("@") ? routingHops[i].substring(1) : routingHops[i];
         }
 
         this.dynamicVariableCount = dynamicVariablePositions.size();
@@ -46,6 +48,18 @@ public class Route {
 
     public ArrayList<Integer> getDynamicVariablePositions() {
         return dynamicVariablePositions;
+    }
+    
+    public HashMap<String,String> calculateVariablesValuesFromUrl(String url) {
+        String[] urlParts = url.split("/");
+        
+        HashMap<String,String> result = new HashMap<>();
+        
+        for(int position : dynamicVariablePositions) {
+            result.put(routingHops[position], urlParts[position]);
+        }
+        
+        return result;
     }
 
     @Override

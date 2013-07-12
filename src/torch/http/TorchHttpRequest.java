@@ -6,6 +6,7 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.*;
 import io.netty.handler.codec.http.HttpRequest;
 import java.util.HashMap;
 import java.util.Set;
+import torch.route.Route;
 import torch.session.Session;
 
 /**
@@ -15,10 +16,19 @@ import torch.session.Session;
 public class TorchHttpRequest extends HttpBase {
 
     private final HttpRequest request;
+    private final Route route;
     private final HashMap<String, Cookie> cookies = new HashMap<>();
+    private final HashMap<String, String> routeVariables;
 
-    public TorchHttpRequest(HttpRequest request) {
+    public TorchHttpRequest(HttpRequest request, Route route) {
         this.request = request;
+        this.route = route;
+
+        if (route != null) {
+            this.routeVariables = route.calculateVariablesValuesFromUrl(request.getUri());
+        } else {
+            this.routeVariables = new HashMap<>();
+        }
 
         String cookieString = request.headers().get(COOKIE);
 
@@ -34,5 +44,9 @@ public class TorchHttpRequest extends HttpBase {
     //Return the session for the request via the sessdata cookie
     public Session getSession() {
         return session.getSession(cookies.get("SESSID").getValue());
+    }
+
+    public String getUrlVariable(String name) {
+        return routeVariables.get(name);
     }
 }
