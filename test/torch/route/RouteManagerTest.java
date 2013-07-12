@@ -1,4 +1,4 @@
-package torch.router;
+package torch.route;
 
 import torch.route.RouteManager;
 import org.testng.annotations.BeforeMethod;
@@ -21,11 +21,11 @@ public class RouteManagerTest {
     public void testGetRouteTargetWithDynamicVariables() {
         WebPage page = new HelloWorldWithTwoVar();
         
-        testTarget.addRoute("/hello/@variable/@variable2/", page);
+        testTarget.defineRoute("/hello/@variable/@variable2/", page);
         
-        assert testTarget.getRouteByUrl("/hello/var1/var2").getTarget().equals(page) : "Dynamic variable test 1";
-        assert testTarget.getRouteByUrl("/hello/lol") == null : "Dynamic variable test 2";
-        assert testTarget.getRouteByUrl("/var1/var2/var3") == null : "Dynamic variable test 3";
+        assert testTarget.calculateRouteByUrl("/hello/var1/var2").getTarget().equals(page) : "Dynamic variable test 1";
+        assert testTarget.calculateRouteByUrl("/hello/lol") == null : "Dynamic variable test 2";
+        assert testTarget.calculateRouteByUrl("/var1/var2/var3") == null : "Dynamic variable test 3";
     }
     
     @Test
@@ -34,12 +34,12 @@ public class RouteManagerTest {
         WebPage page2 = new HelloWorldWithOneVar();
         WebPage page3 = new HelloWorldExactRoute();
         
-        testTarget.addRoute("/hello/@variable/@variable2/", page1);
-        testTarget.addRoute("/hello/@variable/lol/", page2);
-        testTarget.addRoute("/hello/exact/route", page3);
+        testTarget.defineRoute("/hello/@variable/@variable2/", page1);
+        testTarget.defineRoute("/hello/@variable/lol/", page2);
+        testTarget.defineRoute("/hello/exact/route", page3);
         
-        assert testTarget.getRouteByUrl("/hello/exact/route").getTarget().equals(page3) : "Priority test 1";
-        assert testTarget.getRouteByUrl("/hello/var1/var2/").getTarget().equals(page1) : "Priority test 2";
-        assert testTarget.getRouteByUrl("/hello/var1/lol/").getTarget().equals(page2) : "Priority test 3";
+        assert testTarget.calculateRouteByUrl("/hello/exact/route").getTarget().equals(page3) : "Priority test 1";
+        assert testTarget.calculateRouteByUrl("/hello/var1/var2/").getTarget().equals(page1) : "Priority test 2";
+        assert testTarget.calculateRouteByUrl("/hello/var1/lol/").getTarget().equals(page2) : "Priority test 3";
     }
 }

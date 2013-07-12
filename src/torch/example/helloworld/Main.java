@@ -9,7 +9,7 @@ public class Main {
         Server torch = new Server(8080);
         
         //Adding the helloworld page to the route mapper
-        torch.getRouteManager().addRoute("/hello", new HelloWorld());
+        torch.getRouteManager().defineRoute("/hello", new HelloWorld());
         
         //Run the server
         torch.run();

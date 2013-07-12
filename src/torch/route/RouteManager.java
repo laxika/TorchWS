@@ -17,7 +17,7 @@ public class RouteManager {
      * @param route the uri of the route
      * @param target the target of the route
      */
-    public void addRoute(String route, WebPage target) {
+    public void defineRoute(String route, WebPage target) {
         String[] routeHops = route.split("/");
 
         for (int level = 1; level < routeHops.length; level++) {
@@ -26,27 +26,12 @@ public class RouteManager {
     }
 
     /**
-     * Add a new url part to the routing manager.
-     *
-     * @param part the url part
-     * @param partPosition the position of the part in the uri
-     * @param targetId the target webpage of the url
-     */
-    private void addNewRoutePart(String part, int level, Route route) {
-        if (part.startsWith("@")) {
-            dynamicRouteContainer.addRoutePart(level, route);
-        } else {
-            staticRouteContainer.addRoutePart(part, level, route);
-        }
-    }
-
-    /**
-     * Get the best matching route for the uri.
+     * Calculate the best matching route for the uri.
      *
      * @param routeUri the url of the route
      * @return the target or null if no target found
      */
-    public Route getRouteByUrl(String routeUri) {
+    public Route calculateRouteByUrl(String routeUri) {
         String[] routeHops = routeUri.split("/");
 
         ArrayList<Route> possibleTargets = null;
@@ -78,6 +63,21 @@ public class RouteManager {
         }
 
         return null;
+    }
+
+    /**
+     * Add a new url part to the routing manager.
+     *
+     * @param part the url part
+     * @param partPosition the position of the part in the uri
+     * @param targetId the target webpage of the url
+     */
+    private void addNewRoutePart(String part, int level, Route route) {
+        if (part.startsWith("@")) {
+            dynamicRouteContainer.addRoutePart(level, route);
+        } else {
+            staticRouteContainer.addRoutePart(part, level, route);
+        }
     }
 
     private ArrayList<Route> recalculatePossibleTargetsAtLevel(int level, String part, ArrayList<Route> possibleTargets) {

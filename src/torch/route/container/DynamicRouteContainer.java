@@ -10,7 +10,7 @@ public class DynamicRouteContainer {
     private final HashMap<Integer, ArrayList<Route>> dynamicRouteParts = new HashMap<>();
 
     public void addRoutePart(int level, Route route) {
-        if (!containsRoutePart(level)) {
+        if (!dynamicRouteParts.containsKey(level)) {
             dynamicRouteParts.put(level, new ArrayList<Route>());
         }
 
@@ -18,14 +18,10 @@ public class DynamicRouteContainer {
     }
 
     public ArrayList<Route> getRoutePartPossibleTargets(int level) {
-        if (containsRoutePart(level)) {
+        if (dynamicRouteParts.containsKey(level)) {
             return dynamicRouteParts.get(level);
         }
 
         return EMPTY_ARRAY_LIST;
-    }
-
-    private boolean containsRoutePart(int level) {
-        return dynamicRouteParts.containsKey(level);
     }
 }

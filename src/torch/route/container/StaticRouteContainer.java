@@ -18,14 +18,10 @@ public class StaticRouteContainer {
     }
 
     public ArrayList<Route> getRoutePartPossibleTargets(String part, int level) {
-        if (containsRoutePart(part, level)) {
+        if (staticRouteParts.containsKey(part + "_" + level)) {
             return staticRouteParts.get(part + "_" + level);
         }
 
         return EMPTY_ARRAY_LIST;
-    }
-
-    private boolean containsRoutePart(String part, int level) {
-        return staticRouteParts.containsKey(part + "_" + level);
     }
 }

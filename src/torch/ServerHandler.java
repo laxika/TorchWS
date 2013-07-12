@@ -36,7 +36,7 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
             TorchHttpResponse response = new TorchHttpResponse();
             TorchHttpRequest torchreq = new TorchHttpRequest(request);
             
-            Route target = routes.getRouteByUrl(request.getUri());
+            Route target = routes.calculateRouteByUrl(request.getUri());
             if (target != null) {
                 target.getTarget().handle(torchreq, response);
             } else {
