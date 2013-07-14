@@ -14,6 +14,8 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
 import java.util.Map;
+import torch.cookie.Cookie;
+import torch.cookie.CookieStorage;
 import torch.http.RequestMethod;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
@@ -32,13 +34,15 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
     public void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof HttpRequest) {
             HttpRequest request = (HttpRequest) msg;
-            
-            Route target = routes.calculateRouteByUrl(request.getUri(),RequestMethod.getMethodByNettyMethod(request.getMethod()));
-            
+
+            Route target = routes.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
+
+            CookieStorage cookieStorage = new CookieStorage(request.headers().get(COOKIE));
+
             //Handle the message
-            TorchHttpResponse response = new TorchHttpResponse(request);
-            TorchHttpRequest torchreq = new TorchHttpRequest(request, target);
-            
+            TorchHttpResponse response = new TorchHttpResponse(cookieStorage);
+            TorchHttpRequest torchreq = new TorchHttpRequest(request, target, cookieStorage.getCookie("SESSID").getValue());
+
             if (target != null) {
                 target.getTarget().handle(torchreq, response);
             } else {
@@ -64,8 +68,10 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
         }
 
         //Setting the new cookies
-        for (Map.Entry<String, String> pairs : response.getNewCookieData().entrySet()) {
-            fullresponse.headers().add(SET_COOKIE, ServerCookieEncoder.encode(pairs.getKey(), pairs.getValue()));
+        for (Object pairs : response.getNewCookieData()) {
+            Cookie obj = ((Map.Entry<String, Cookie>) pairs).getValue();
+            
+            fullresponse.headers().add(SET_COOKIE, ServerCookieEncoder.encode(obj.getName(), obj.getValue()));
         }
 
         // Write the response.

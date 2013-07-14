@@ -1,13 +1,9 @@
 package torch.http;
 
-import io.netty.handler.codec.http.Cookie;
-import io.netty.handler.codec.http.CookieDecoder;
-import static io.netty.handler.codec.http.HttpHeaders.Names.COOKIE;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import java.util.HashMap;
-import java.util.Set;
-import static torch.http.HttpBase.session;
+import torch.cookie.Cookie;
+import torch.cookie.CookieStorage;
+import static torch.http.HttpBase.sessionManager;
 import torch.session.Session;
 
 public class TorchHttpResponse extends HttpBase {
@@ -15,22 +11,10 @@ public class TorchHttpResponse extends HttpBase {
     private StringBuilder content = new StringBuilder();
     private HttpResponseStatus status = HttpResponseStatus.OK;
     private String contentType = "text/html; charset=UTF-8";
-    private HashMap<String,String> cookies = new HashMap<>();
-    private String sessionId = "";
+    private final CookieStorage cookieStorage;
     
-    public TorchHttpResponse(HttpRequest request) {
-        
-        String cookieString = request.headers().get(COOKIE);
-
-        if (cookieString != null) {
-            Set<Cookie> cookies = CookieDecoder.decode(cookieString);
-
-            for (Cookie cookie : cookies) {
-                if(cookie.getName().equals("SESSID")) {
-                    sessionId = cookie.getValue();
-                }
-            }
-        }
+    public TorchHttpResponse(CookieStorage cookieStorage) {
+        this.cookieStorage = cookieStorage;
     }
 
     public void appendContent(String text) {
@@ -59,18 +43,18 @@ public class TorchHttpResponse extends HttpBase {
     
     public Session startNewSession() {
         //Remove the existing session
-        if(!sessionId.equals("")) {
-            session.removeSessionById(sessionId);
+        if(cookieStorage.getCookie("SESSID") != null) {
+            sessionManager.removeSessionById(cookieStorage.getCookie("SESSID").getValue());
         }
         
-        Session newSession = session.startNewSession();
+        Session newSession = sessionManager.startNewSession();
         
-        cookies.put("SESSID", newSession.getSessionId());
+        cookieStorage.addCookie(new Cookie("SESSID", newSession.getSessionId(), true));
         
         return newSession;
     }
     
-    public HashMap<String,String> getNewCookieData() {
-        return cookies;
+    public CookieStorage getNewCookieData() {
+        return cookieStorage;
     }
 }
