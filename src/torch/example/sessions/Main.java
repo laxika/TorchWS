@@ -8,9 +8,9 @@ public class Main {
         //Creating a new server instance
         Server torch = new Server(8080);
 
-        //Adding the helloworld page to the route mapper
-        torch.getRouteManager().defineRoute("/create", new StartSession());
-        torch.getRouteManager().defineRoute("/check", new CheckSession());
+        //Adding the check page to the route mapper
+        torch.getRouteManager().defineRoute("/check", new CheckSessionVar());
+        torch.getRouteManager().defineRoute("/set", new SetSessionVar());
 
         //Run the server
         torch.run();

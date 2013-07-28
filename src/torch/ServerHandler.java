@@ -21,10 +21,13 @@ import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
 import torch.route.Route;
 import torch.route.RouteManager;
+import torch.session.Session;
+import torch.session.SessionManager;
 
 public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
 
     private final RouteManager routes;
+    protected static SessionManager sessionManager = new SessionManager();
 
     public ServerHandler(RouteManager container) {
         this.routes = container;
@@ -34,6 +37,7 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
     public void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof HttpRequest) {
             HttpRequest request = (HttpRequest) msg;
+            
 
             Route target = routes.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
 
@@ -41,10 +45,18 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
 
             //Handle the message
             TorchHttpResponse response = new TorchHttpResponse(cookieStorage);
-            TorchHttpRequest torchreq = new TorchHttpRequest(request, target, cookieStorage.getCookie("SESSID").getValue());
+            TorchHttpRequest torchreq = new TorchHttpRequest(request, target);
+            
+            Session session = sessionManager.getSession(cookieStorage.getCookie("SESSID").getValue());
+            
+            //New session
+            if(session == null) {
+                session = sessionManager.startNewSession();
+                response.getNewCookieData().addCookie(new Cookie("SESSID", session.getSessionId()));
+            }
 
             if (target != null) {
-                target.getTarget().handle(torchreq, response);
+                target.getTarget().handle(torchreq, response, session);
             } else {
                 response.appendContent("404 Not Found!");
                 response.setStatus(HttpResponseStatus.NOT_FOUND);

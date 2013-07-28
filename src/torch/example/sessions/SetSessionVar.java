@@ -1,14 +1,15 @@
-package torch.example.routing;
+package torch.example.sessions;
 
 import torch.handler.WebPage;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
 import torch.session.Session;
 
-public class HelloWorldExactRoute extends WebPage {
+public class SetSessionVar extends WebPage {
 
     @Override
     public void handle(TorchHttpRequest request, TorchHttpResponse response, Session session) {
-        response.appendContent("This is a direct route to a variable!");
+        session.setSessionVariable("testvar", "XYZ smthing");
     }
+    
 }
