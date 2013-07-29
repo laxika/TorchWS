@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
-import io.netty.util.Attribute;
+import io.netty.handler.codec.http.multipart.MemoryAttribute;
 import java.util.HashMap;
 import java.util.List;
 import torch.route.Route;
@@ -28,9 +28,9 @@ public class TorchHttpRequest {
             List<InterfaceHttpData> data = decoder.getBodyHttpDatas();
             for (InterfaceHttpData interf : data) {
                 if (interf.getHttpDataType() == HttpDataType.Attribute) {
-                    Attribute attribute = (Attribute) interf;
+                    MemoryAttribute attribute = (MemoryAttribute) interf;
 
-                    postVariables.put(attribute.key().name(), attribute.get().toString());
+                    postVariables.put(attribute.getName(), attribute.getValue());
                 }
             }
         }
