@@ -38,7 +38,6 @@ public class ServerHandler extends ChannelInboundMessageHandlerAdapter<Object> {
         if (msg instanceof HttpRequest) {
             HttpRequest request = (HttpRequest) msg;
             
-
             Route target = routes.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
 
             CookieStorage cookieStorage = new CookieStorage(request.headers().get(COOKIE));

@@ -26,8 +26,12 @@ public class RouteManager {
     public void defineRoute(String route, WebPage target, RequestMethod method) {
         String[] routeHops = route.split("/");
 
-        for (int level = 1; level < routeHops.length; level++) {
-            addNewRoutePart(routeHops[level], level, new Route(route, method, target));
+        if (routeHops.length == 0) {
+            addNewRoutePart("", 0, new Route(route, method, target));
+        } else {
+            for (int level = 1; level < routeHops.length; level++) {
+                addNewRoutePart(routeHops[level], level, new Route(route, method, target));
+            }
         }
     }
 
@@ -40,6 +44,10 @@ public class RouteManager {
      */
     public Route calculateRouteByUrl(String routeUri, RequestMethod method) {
         String[] routeHops = routeUri.split("/");
+        
+        if (routeHops.length == 0) {
+            return staticRouteContainer.getRoutePartPossibleTargets("", 0).get(0);
+        }
 
         ArrayList<Route> possibleTargets = null;
 
@@ -47,8 +55,8 @@ public class RouteManager {
         for (int level = 1; level < routeHops.length; level++) {
             possibleTargets = recalculatePossibleTargetsAtLevel(level, routeHops[level], possibleTargets);
         }
-        
-        if(possibleTargets == null) {
+
+        if (possibleTargets == null) {
             return null;
         }
 

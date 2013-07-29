@@ -22,4 +22,8 @@ public class Session {
     public Object getSessionVariable(String name) {
         return sessionVariables.get(name);
     }
+    
+    public boolean isSessionVariableSet(String name) {
+        return sessionVariables.containsKey(name);
+    }
 }
