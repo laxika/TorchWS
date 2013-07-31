@@ -9,8 +9,8 @@ public class Main {
         Server torch = new Server(8080);
 
         //Adding the check page to the route mapper
-        torch.getRouteManager().defineRoute("/check", new CheckSessionVar());
-        torch.getRouteManager().defineRoute("/set", new SetSessionVar());
+        torch.getRouteManager().defineRoute("/check", CheckSessionVar.class);
+        torch.getRouteManager().defineRoute("/set", SetSessionVar.class);
 
         //Run the server
         torch.run();

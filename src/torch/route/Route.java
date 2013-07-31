@@ -10,13 +10,13 @@ public class Route {
 
     private final String routingUri;
     private final int hopCount;
-    private final WebPage target;
+    private final Class target;
     private final String[] routingHops;
     private final int dynamicVariableCount;
     private final ArrayList<Integer> dynamicVariablePositions = new ArrayList<>();
     private final RequestMethod method;
 
-    public Route(String routingUri, RequestMethod method, WebPage target) {
+    public Route(String routingUri, RequestMethod method, Class target) {
         this.routingUri = routingUri;
         this.target = target;
         this.routingHops = routingUri.split("/");
@@ -37,7 +37,7 @@ public class Route {
         return hopCount;
     }
 
-    public WebPage getTarget() {
+    public Class getTarget() {
         return target;
     }
     

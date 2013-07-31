@@ -10,10 +10,10 @@ public class Main {
         Server torch = new Server(8080);
         
         //Adding the webpages to the route manager
-        torch.getRouteManager().defineRoute("/", new IndexPage());
-        torch.getRouteManager().defineRoute("/login", new LoginPage(), RequestMethod.GET);
-        torch.getRouteManager().defineRoute("/login", new LoginPage(), RequestMethod.POST);
-        torch.getRouteManager().defineRoute("/logout", new LogoutPage());
+        torch.getRouteManager().defineRoute("/", IndexPage.class);
+        torch.getRouteManager().defineRoute("/login", LoginPage.class, RequestMethod.GET);
+        torch.getRouteManager().defineRoute("/login", LoginPage.class, RequestMethod.POST);
+        torch.getRouteManager().defineRoute("/logout", LogoutPage.class);
         
         //Run the server
         torch.run();

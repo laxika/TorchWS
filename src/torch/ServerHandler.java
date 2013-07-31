@@ -14,6 +14,7 @@ import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
 import java.util.Map;
 import torch.cookie.Cookie;
+import torch.handler.WebPage;
 import torch.http.RequestMethod;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
@@ -53,9 +54,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
                 response.getCookieData().addCookie(new Cookie("SESSID", session.getSessionId()));
             }
 
+            //Check that we the target of the route
             if (target != null) {
-                target.getTarget().handle(torchreq, response, session);
+                //Instantiate a new WebPage object and handle the request
+                ((WebPage) target.getTarget().getConstructor().newInstance()).handle(torchreq, response, session);
             } else {
+                //Send back not found 404
                 response.appendContent("404 Not Found!");
                 response.setStatus(HttpResponseStatus.NOT_FOUND);
             }

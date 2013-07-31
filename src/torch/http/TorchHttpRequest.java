@@ -10,6 +10,7 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
 import java.util.HashMap;
 import java.util.List;
+import torch.cookie.Cookie;
 import torch.cookie.ReadOnlyCookieStorage;
 import torch.route.Route;
 
@@ -70,8 +71,14 @@ public class TorchHttpRequest {
     public String getPostVariable(String name) {
         return postVariables.get(name);
     }
-    
+
     public String getCookieVariable(String name) {
-        return cookieStorage.getCookie(name).getValue();
+        Cookie cookie = cookieStorage.getCookie(name);
+        
+        if (cookie != null) {
+            return cookie.getValue();
+        }
+        
+        return null;
     }
 }

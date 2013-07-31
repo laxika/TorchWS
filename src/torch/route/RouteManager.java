@@ -2,7 +2,6 @@ package torch.route;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import torch.handler.WebPage;
 import torch.http.RequestMethod;
 import torch.route.container.DynamicRouteContainer;
 import torch.route.container.StaticRouteContainer;
@@ -13,7 +12,7 @@ public class RouteManager {
     private final StaticRouteContainer staticRouteContainer = new StaticRouteContainer();
     private final DynamicRouteContainer dynamicRouteContainer = new DynamicRouteContainer();
 
-    public void defineRoute(String route, WebPage target) {
+    public void defineRoute(String route, Class target) {
         defineRoute(route, target, RequestMethod.GET);
     }
 
@@ -23,7 +22,7 @@ public class RouteManager {
      * @param route the uri of the route
      * @param target the target of the route
      */
-    public void defineRoute(String route, WebPage target, RequestMethod method) {
+    public void defineRoute(String route, Class target, RequestMethod method) {
         String[] routeHops = route.split("/");
 
         if (routeHops.length == 0) {
