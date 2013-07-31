@@ -21,7 +21,7 @@ public class LoginPage extends WebPage {
                     + "</form>"
                     + "</body></html>");
         } else if (request.getMethod() == RequestMethod.POST) {
-            if("admin".equals(request.getPostVariable("username")) && "admin".equals(request.getPostVariable("password"))) {
+            if("admin".equals(request.getPostData().getValue("username")) && "admin".equals(request.getPostData().getValue("password"))) {
                 session.setSessionVariable("userid", 1); //1th user is the admin, use real userid here
             }
         }

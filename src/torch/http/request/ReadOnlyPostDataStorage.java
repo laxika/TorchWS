@@ -1,0 +1,41 @@
+package torch.http.request;
+
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import io.netty.handler.codec.http.multipart.MemoryAttribute;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+public class ReadOnlyPostDataStorage implements Iterable {
+
+    private HashMap<String, String> postVariableStorage = new HashMap<>();
+
+    public ReadOnlyPostDataStorage(HttpRequest request) {
+        if (request.getMethod() == HttpMethod.POST) {
+            HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(new DefaultHttpDataFactory(false), request);
+
+            List<InterfaceHttpData> data = decoder.getBodyHttpDatas();
+            for (InterfaceHttpData interf : data) {
+                if (interf.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
+                    MemoryAttribute attribute = (MemoryAttribute) interf;
+
+                    postVariableStorage.put(attribute.getName(), attribute.getValue());
+                }
+            }
+        }
+    }
+
+    public String getValue(String name) {
+        return postVariableStorage.get(name);
+    }
+
+    @Override
+    public Iterator<Map.Entry<String, String>> iterator() {
+        return postVariableStorage.entrySet().iterator();
+    }
+}
