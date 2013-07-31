@@ -6,14 +6,22 @@ import torch.http.TorchHttpResponse;
 import torch.session.Session;
 
 public class TemplateExample extends WebPage{
+    
+    public TemplateRoot templateRoot = new TemplateRoot();
 
     @Override
     public void handle(TorchHttpRequest request, TorchHttpResponse response, Session session) {
-        this.getTemplateStorage().setVariable("user", new UserData("TestUser", "You think that Laxika is the best guy ever!"));
+        templateRoot.getUser().setUsername("TestUser");
+        templateRoot.getUser().setExtrainfo("You think that Laxika is the best guy ever!");
     }
     
     @Override
     public String getTemplate() {
         return "example/TemplateExample.tpl";
+    }
+    
+    @Override
+    public Object getTemplateRoot() {
+        return templateRoot;
     }
 }

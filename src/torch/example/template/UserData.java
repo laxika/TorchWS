@@ -3,19 +3,22 @@ package torch.example.template;
 
 public class UserData {
     
-    private final String userName;
-    private final String extraInfo;
-    
-    public UserData(String userName, String extraInfo) {
-        this.userName = userName;
-        this.extraInfo = extraInfo;
-    }
+    private String userName;
+    private String extraInfo;
     
     public String getUsername() {
         return userName;
     }
     
+    public void setUsername(String name) {
+        this.userName = name;
+    }
+    
     public String getExtrainfo() {
         return extraInfo;
+    }
+    
+    public void setExtrainfo(String info) {
+        this.extraInfo = info;
     }
 }

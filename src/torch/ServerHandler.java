@@ -66,18 +66,18 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
                 webpage.handle(torchreq, response, session);
 
                 FullHttpResponse fullresponse;
-                if(webpage.getTemplate() == null) {
+                if (webpage.getTemplate() == null) {
                     fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
                 } else {
                     Template temp = templateManager.getTemplate(webpage.getTemplate());
-                    
+
                     StringWriter templateText = new StringWriter();
-                    
-                    temp.process(webpage.getTemplateStorage().getRoot(), templateText);
+
+                    temp.process(webpage.getTemplateRoot(), templateText);
 
                     fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(templateText.toString(), CharsetUtil.UTF_8));
                 }
-                
+
                 fullresponse.headers().set(CONTENT_TYPE, response.getContentType());
 
                 //Setting the new cookies
@@ -91,16 +91,16 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
                 ctx.write(fullresponse);
             } else {
                 //Send back not found 404
-                sendErrorResponse(ctx,HttpResponseStatus.NOT_FOUND);
+                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND);
             }
         }
     }
 
     private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status) {
         FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("404 Not found!", CharsetUtil.UTF_8));
-        
+
         fullresponse.headers().set(CONTENT_TYPE, "text/html; charset=UTF-8");
-        
+
         ctx.write(fullresponse);
     }
 
