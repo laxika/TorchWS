@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class ReadOnlyUrlVariableStorage implements Iterable {
+public class ReadOnlyRouteDataStorage implements Iterable {
 
     private HashMap<String, String> urlVariableStorage = new HashMap<>();
 
-    public ReadOnlyUrlVariableStorage(HashMap<String,String> urlData) {
+    public ReadOnlyRouteDataStorage(HashMap<String,String> urlData) {
         this.urlVariableStorage = urlData;
     }
 

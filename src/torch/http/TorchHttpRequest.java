@@ -10,20 +10,20 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
 import java.util.HashMap;
 import java.util.List;
-import torch.cookie.ReadOnlyCookieStorage;
-import torch.http.request.ReadOnlyUrlVariableStorage;
+import torch.cookie.ReadOnlyCookieDataStorage;
+import torch.http.request.ReadOnlyRouteDataStorage;
 import torch.route.Route;
 
 public class TorchHttpRequest {
 
     private final HttpRequest request;
     private final HashMap<String, String> postVariables;
-    private final ReadOnlyUrlVariableStorage routeVariables;
-    private final ReadOnlyCookieStorage cookieStorage;
+    private final ReadOnlyRouteDataStorage routeVariables;
+    private final ReadOnlyCookieDataStorage cookieStorage;
 
     public TorchHttpRequest(HttpRequest request, Route route) {
         this.request = request;
-        this.cookieStorage = new ReadOnlyCookieStorage(request.headers().get(COOKIE));
+        this.cookieStorage = new ReadOnlyCookieDataStorage(request.headers().get(COOKIE));
         this.postVariables = new HashMap<>();
 
         if (request.getMethod() == HttpMethod.POST) {
@@ -40,9 +40,9 @@ public class TorchHttpRequest {
         }
 
         if (route != null) {
-            this.routeVariables = new ReadOnlyUrlVariableStorage(route.calculateVariablesValuesFromUrl(request.getUri()));
+            this.routeVariables = new ReadOnlyRouteDataStorage(route.calculateVariablesValuesFromUrl(request.getUri()));
         } else {
-            this.routeVariables = new ReadOnlyUrlVariableStorage(new HashMap<String,String>());
+            this.routeVariables = new ReadOnlyRouteDataStorage(new HashMap<String,String>());
         }
     }
 
@@ -64,8 +64,7 @@ public class TorchHttpRequest {
         return RequestMethod.GET;
     }
     
-    //TODO: rename everything to getRouteData and ReadOnlyRouteDataStorage!!!
-    public ReadOnlyUrlVariableStorage getUrlVariableData() {
+    public ReadOnlyRouteDataStorage getRouteData() {
         return routeVariables;
     }
 
@@ -73,7 +72,7 @@ public class TorchHttpRequest {
         return postVariables.get(name);
     }
 
-    public ReadOnlyCookieStorage getCookieData() {
+    public ReadOnlyCookieDataStorage getCookieData() {
         return cookieStorage;
     }
 }

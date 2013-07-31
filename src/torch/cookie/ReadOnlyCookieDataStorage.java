@@ -6,11 +6,11 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class ReadOnlyCookieStorage implements Iterable {
+public class ReadOnlyCookieDataStorage implements Iterable {
 
     private HashMap<String, Cookie> cookieStorage = new HashMap<>();
 
-    public ReadOnlyCookieStorage(String cookieString) {
+    public ReadOnlyCookieDataStorage(String cookieString) {
         if (cookieString != null) {
             Set<io.netty.handler.codec.http.Cookie> cookies = CookieDecoder.decode(cookieString);
 
