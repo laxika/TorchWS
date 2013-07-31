@@ -24,6 +24,7 @@ public class TorchHttpRequest {
     public TorchHttpRequest(HttpRequest request, Route route) {
         this.request = request;
         this.cookieStorage = new ReadOnlyCookieDataStorage(request.headers().get(COOKIE));
+        this.routeVariables = new ReadOnlyRouteDataStorage(route,request.getUri());
         this.postVariables = new HashMap<>();
 
         if (request.getMethod() == HttpMethod.POST) {
@@ -37,12 +38,6 @@ public class TorchHttpRequest {
                     postVariables.put(attribute.getName(), attribute.getValue());
                 }
             }
-        }
-
-        if (route != null) {
-            this.routeVariables = new ReadOnlyRouteDataStorage(route.calculateVariablesValuesFromUrl(request.getUri()));
-        } else {
-            this.routeVariables = new ReadOnlyRouteDataStorage(new HashMap<String,String>());
         }
     }
 

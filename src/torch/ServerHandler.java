@@ -36,50 +36,55 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
     public void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof HttpRequest) {
             HttpRequest request = (HttpRequest) msg;
-            
+
             if (HttpHeaders.is100ContinueExpected(request)) {
                 send100Continue(ctx);
             }
 
-            //TODO: only create the request/response if target is not null!!
-            
             Route target = routes.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
-            //Handle the message
-            TorchHttpResponse response = new TorchHttpResponse();
-            TorchHttpRequest torchreq = new TorchHttpRequest(request, target);
-
-            Session session = sessionManager.getSession(torchreq.getCookieData().getCookie("SESSID").getValue());
-
-            //New session
-            if (session == null) {
-                session = sessionManager.startNewSession();
-                response.getCookieData().addCookie(new Cookie("SESSID", session.getSessionId()));
-            }
 
             //Check that we the target of the route
-            if (target != null) {
+            if (target != null) {            //Handle the message
+                TorchHttpResponse response = new TorchHttpResponse();
+                TorchHttpRequest torchreq = new TorchHttpRequest(request, target);
+
+                Session session = sessionManager.getSession(torchreq.getCookieData().getCookie("SESSID").getValue());
+
+                //New session
+                if (session == null) {
+                    session = sessionManager.startNewSession();
+                    response.getCookieData().addCookie(new Cookie("SESSID", session.getSessionId()));
+                }
+
                 //Instantiate a new WebPage object and handle the request
                 ((WebPage) target.getTarget().getConstructor().newInstance()).handle(torchreq, response, session);
+
+                FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
+
+                fullresponse.headers().set(CONTENT_TYPE, response.getContentType());
+
+                //Setting the new cookies
+                for (Object pairs : response.getCookieData()) {
+                    Cookie obj = ((Map.Entry<String, Cookie>) pairs).getValue();
+
+                    fullresponse.headers().add(SET_COOKIE, ServerCookieEncoder.encode(obj.getName(), obj.getValue()));
+                }
+
+                // Write the response.
+                ctx.write(fullresponse);
             } else {
                 //Send back not found 404
-                response.appendContent("404 Not Found!");
-                response.setStatus(HttpResponseStatus.NOT_FOUND);
+                sendErrorResponse(ctx,HttpResponseStatus.NOT_FOUND);
             }
-
-            FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
-
-            fullresponse.headers().set(CONTENT_TYPE, response.getContentType());
-
-            //Setting the new cookies
-            for (Object pairs : response.getCookieData()) {
-                Cookie obj = ((Map.Entry<String, Cookie>) pairs).getValue();
-
-                fullresponse.headers().add(SET_COOKIE, ServerCookieEncoder.encode(obj.getName(), obj.getValue()));
-            }
-
-            // Write the response.
-            ctx.write(fullresponse);
         }
+    }
+
+    private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status) {
+        FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("404 Not found!", CharsetUtil.UTF_8));
+        
+        fullresponse.headers().set(CONTENT_TYPE, "text/html; charset=UTF-8");
+        
+        ctx.write(fullresponse);
     }
 
     @Override

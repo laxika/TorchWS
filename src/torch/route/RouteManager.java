@@ -43,9 +43,15 @@ public class RouteManager {
      */
     public Route calculateRouteByUrl(String routeUri, RequestMethod method) {
         String[] routeHops = routeUri.split("/");
-        
+
         if (routeHops.length == 0) {
-            return staticRouteContainer.getRoutePartPossibleTargets("", 0).get(0);
+            ArrayList<Route> possibleTargets = staticRouteContainer.getRoutePartPossibleTargets("", 0);
+
+            if (possibleTargets.size() > 0) {
+                return staticRouteContainer.getRoutePartPossibleTargets("", 0).get(0);
+            }
+
+            return null;
         }
 
         ArrayList<Route> possibleTargets = null;
