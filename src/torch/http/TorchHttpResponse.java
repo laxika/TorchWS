@@ -1,18 +1,14 @@
 package torch.http;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import torch.cookie.CookieStorage;
+import torch.cookie.ReadWriteCookieStorage;
 
 public class TorchHttpResponse {
 
     private StringBuilder content = new StringBuilder();
     private HttpResponseStatus status = HttpResponseStatus.OK;
     private String contentType = "text/html; charset=UTF-8";
-    private final CookieStorage cookieStorage;
-
-    public TorchHttpResponse(CookieStorage cookieStorage) {
-        this.cookieStorage = cookieStorage;
-    }
+    private final ReadWriteCookieStorage cookieStorage = new ReadWriteCookieStorage();
 
     public void appendContent(String text) {
         content.append(text);
@@ -38,7 +34,13 @@ public class TorchHttpResponse {
         this.contentType = contentType;
     }
 
-    public CookieStorage getNewCookieData() {
+    /**
+     * Return the cookie storage for new, need to send cookies. Only add cookies
+     * what you plan to send to the client.
+     * 
+     * @return the cookie storage
+     */
+    public ReadWriteCookieStorage getCookieData() {
         return cookieStorage;
     }
 }

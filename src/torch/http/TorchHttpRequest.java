@@ -1,5 +1,6 @@
 package torch.http;
 
+import static io.netty.handler.codec.http.HttpHeaders.Names.*;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
@@ -9,6 +10,7 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
 import java.util.HashMap;
 import java.util.List;
+import torch.cookie.ReadOnlyCookieStorage;
 import torch.route.Route;
 
 public class TorchHttpRequest {
@@ -16,10 +18,11 @@ public class TorchHttpRequest {
     private final HttpRequest request;
     private final HashMap<String, String> routeVariables;
     private final HashMap<String, String> postVariables;
+    private final ReadOnlyCookieStorage cookieStorage;
 
     public TorchHttpRequest(HttpRequest request, Route route) {
         this.request = request;
-        
+        this.cookieStorage = new ReadOnlyCookieStorage(request.headers().get(COOKIE));
         this.postVariables = new HashMap<>();
 
         if (request.getMethod() == HttpMethod.POST) {
@@ -66,5 +69,9 @@ public class TorchHttpRequest {
 
     public String getPostVariable(String name) {
         return postVariables.get(name);
+    }
+    
+    public String getCookieVariable(String name) {
+        return cookieStorage.getCookie(name).getValue();
     }
 }

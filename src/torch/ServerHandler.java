@@ -1,7 +1,6 @@
 package torch;
 
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -15,7 +14,6 @@ import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
 import java.util.Map;
 import torch.cookie.Cookie;
-import torch.cookie.CookieStorage;
 import torch.http.RequestMethod;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
@@ -43,19 +41,16 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
             }
 
             Route target = routes.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
-
-            CookieStorage cookieStorage = new CookieStorage(request.headers().get(COOKIE));
-
             //Handle the message
-            TorchHttpResponse response = new TorchHttpResponse(cookieStorage);
+            TorchHttpResponse response = new TorchHttpResponse();
             TorchHttpRequest torchreq = new TorchHttpRequest(request, target);
 
-            Session session = sessionManager.getSession(cookieStorage.getCookie("SESSID").getValue());
+            Session session = sessionManager.getSession(torchreq.getCookieVariable("SESSID"));
 
             //New session
             if (session == null) {
                 session = sessionManager.startNewSession();
-                response.getNewCookieData().addCookie(new Cookie("SESSID", session.getSessionId()));
+                response.getCookieData().addCookie(new Cookie("SESSID", session.getSessionId()));
             }
 
             if (target != null) {
@@ -70,7 +65,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
             fullresponse.headers().set(CONTENT_TYPE, response.getContentType());
 
             //Setting the new cookies
-            for (Object pairs : response.getNewCookieData()) {
+            for (Object pairs : response.getCookieData()) {
                 Cookie obj = ((Map.Entry<String, Cookie>) pairs).getValue();
 
                 fullresponse.headers().add(SET_COOKIE, ServerCookieEncoder.encode(obj.getName(), obj.getValue()));
