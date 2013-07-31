@@ -1,7 +1,6 @@
 package torch.http;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.*;
-import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import torch.cookie.ReadOnlyCookieDataStorage;
 import torch.http.request.ReadOnlyPostDataStorage;
@@ -23,21 +22,7 @@ public class TorchHttpRequest {
     }
 
     public RequestMethod getMethod() {
-        HttpMethod method = request.getMethod();
-
-        if (method == HttpMethod.POST) {
-            return RequestMethod.POST;
-        }
-
-        if (method == HttpMethod.DELETE) {
-            return RequestMethod.DELETE;
-        }
-
-        if (method == HttpMethod.PUT) {
-            return RequestMethod.PUT;
-        }
-
-        return RequestMethod.GET;
+        return RequestMethod.getMethodByNettyMethod(request.getMethod());
     }
     
     public ReadOnlyRouteDataStorage getRouteData() {
