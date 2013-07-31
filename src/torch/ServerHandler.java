@@ -1,5 +1,6 @@
 package torch;
 
+import freemarker.template.Template;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -12,6 +13,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
+import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
 import java.util.Map;
 import torch.cookie.Cookie;
 import torch.handler.WebPage;
@@ -22,11 +25,13 @@ import torch.route.Route;
 import torch.route.RouteManager;
 import torch.session.Session;
 import torch.session.SessionManager;
+import torch.template.TemplateManager;
 
 public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     private final RouteManager routes;
     protected static SessionManager sessionManager = new SessionManager();
+    protected static TemplateManager templateManager = new TemplateManager();
 
     public ServerHandler(RouteManager container) {
         routes = container;
@@ -57,10 +62,22 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
                 }
 
                 //Instantiate a new WebPage object and handle the request
-                ((WebPage) target.getTarget().getConstructor().newInstance()).handle(torchreq, response, session);
+                WebPage webpage = (WebPage) target.getTarget().getConstructor().newInstance();
+                webpage.handle(torchreq, response, session);
 
-                FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
+                FullHttpResponse fullresponse;
+                if(webpage.getTemplate() == null) {
+                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
+                } else {
+                    Template temp = templateManager.getTemplate(webpage.getTemplate());
+                    
+                    StringWriter templateText = new StringWriter();
+                    
+                    temp.process(webpage.getTemplateStorage().getRoot(), templateText);
 
+                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(templateText.toString(), CharsetUtil.UTF_8));
+                }
+                
                 fullresponse.headers().set(CONTENT_TYPE, response.getContentType());
 
                 //Setting the new cookies
