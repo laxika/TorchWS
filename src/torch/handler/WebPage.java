@@ -7,4 +7,8 @@ import torch.session.Session;
 public abstract class WebPage {
 
     public abstract void handle(TorchHttpRequest request, TorchHttpResponse response, Session session);
+    
+    public String getTemplate() {
+        return null;
+    }
 }
