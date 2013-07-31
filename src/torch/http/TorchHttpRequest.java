@@ -10,15 +10,15 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
 import java.util.HashMap;
 import java.util.List;
-import torch.cookie.Cookie;
 import torch.cookie.ReadOnlyCookieStorage;
+import torch.http.request.ReadOnlyUrlVariableStorage;
 import torch.route.Route;
 
 public class TorchHttpRequest {
 
     private final HttpRequest request;
-    private final HashMap<String, String> routeVariables;
     private final HashMap<String, String> postVariables;
+    private final ReadOnlyUrlVariableStorage routeVariables;
     private final ReadOnlyCookieStorage cookieStorage;
 
     public TorchHttpRequest(HttpRequest request, Route route) {
@@ -40,9 +40,9 @@ public class TorchHttpRequest {
         }
 
         if (route != null) {
-            this.routeVariables = route.calculateVariablesValuesFromUrl(request.getUri());
+            this.routeVariables = new ReadOnlyUrlVariableStorage(route.calculateVariablesValuesFromUrl(request.getUri()));
         } else {
-            this.routeVariables = new HashMap<>();
+            this.routeVariables = new ReadOnlyUrlVariableStorage(new HashMap<String,String>());
         }
     }
 
@@ -63,22 +63,17 @@ public class TorchHttpRequest {
 
         return RequestMethod.GET;
     }
-
-    public String getUrlVariable(String name) {
-        return routeVariables.get(name);
+    
+    //TODO: rename everything to getRouteData and ReadOnlyRouteDataStorage!!!
+    public ReadOnlyUrlVariableStorage getUrlVariableData() {
+        return routeVariables;
     }
 
     public String getPostVariable(String name) {
         return postVariables.get(name);
     }
 
-    public String getCookieVariable(String name) {
-        Cookie cookie = cookieStorage.getCookie(name);
-        
-        if (cookie != null) {
-            return cookie.getValue();
-        }
-        
-        return null;
+    public ReadOnlyCookieStorage getCookieData() {
+        return cookieStorage;
     }
 }

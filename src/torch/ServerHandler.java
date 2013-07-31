@@ -41,12 +41,14 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
                 send100Continue(ctx);
             }
 
+            //TODO: only create the request/response if target is not null!!
+            
             Route target = routes.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
             //Handle the message
             TorchHttpResponse response = new TorchHttpResponse();
             TorchHttpRequest torchreq = new TorchHttpRequest(request, target);
 
-            Session session = sessionManager.getSession(torchreq.getCookieVariable("SESSID"));
+            Session session = sessionManager.getSession(torchreq.getCookieData().getCookie("SESSID").getValue());
 
             //New session
             if (session == null) {
