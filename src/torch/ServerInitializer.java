@@ -32,7 +32,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast("aggregator", new HttpObjectAggregator(1048576)); //Aggregating the request chunks to one big request
         pipeline.addLast("encoder", new HttpResponseEncoder()); 
         pipeline.addLast("streamer", new ChunkedWriteHandler()); //Used at file downloads
-        pipeline.addLast("deflater", new HttpContentCompressor()); //Gzip the output
-        pipeline.addLast("handler", new ServerHandler(container));
+//        pipeline.addLast("deflater", new HttpContentCompressor()); //Gzip the output
+        pipeline.addLast("handler", new ServerHandler(container, true)); //Set 2nd var false if SSL
     }
 }
