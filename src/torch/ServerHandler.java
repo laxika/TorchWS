@@ -20,7 +20,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.ServerCookieEncoder;
-import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -53,11 +52,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
     public static final int HTTP_CACHE_SECONDS = 60;
-    private final boolean useSendFile;
 
-    public ServerHandler(RouteManager container, boolean useSendFile) {
+    public ServerHandler(RouteManager container) {
         this.routes = container;
-        this.useSendFile = useSendFile;
     }
 
     @Override
@@ -152,14 +149,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                 ctx.write(response);
 
                 // Write the content.
-                ChannelFuture sendFileFuture;
-                if (useSendFile) {
-                    sendFileFuture =
-                            ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
-                } else {
-                    sendFileFuture =
-                            ctx.write(new ChunkedFile(raf, 0, fileLength, 8192), ctx.newProgressivePromise());
-                }
+                ChannelFuture sendFileFuture = ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
 
                 sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
                     @Override
