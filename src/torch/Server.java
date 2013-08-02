@@ -4,15 +4,13 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.util.AttributeKey;
 import torch.route.RouteManager;
 
 /**
  * Initialize the server.
  */
 public class Server {
-    
-    public static final AttributeKey<RouteManager> routeManager = new AttributeKey<>("RouteManager");
+
     private static final RouteManager container = new RouteManager();
 
     /**
@@ -30,8 +28,8 @@ public class Server {
             serverBootstrap.group(bossGroup, workerGroup);
             serverBootstrap.channel(NioServerSocketChannel.class);
             serverBootstrap.childHandler(new ServerInitializer());
-            
-            serverBootstrap.childAttr(routeManager, container);
+
+            serverBootstrap.childAttr(ChannelVariable.ROUTE_MANAGER.getVariableKey(), container);
 
             serverBootstrap.bind(8080).sync().channel().closeFuture().sync();
         } finally {

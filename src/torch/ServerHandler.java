@@ -56,7 +56,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         
         //Get the route manager
-        RouteManager routeManager = ctx.channel().attr(Server.routeManager).get();
+        RouteManager routeManager = (RouteManager) ctx.channel().attr(ChannelVariable.ROUTE_MANAGER.getVariableKey()).get();
 
         if (!request.getDecoderResult().isSuccess()) {
             sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
