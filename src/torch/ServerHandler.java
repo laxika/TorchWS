@@ -46,26 +46,24 @@ import torch.template.TemplateManager;
 
 public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
-    private final RouteManager routes;
     protected static SessionManager sessionManager = new SessionManager();
     protected static TemplateManager templateManager = new TemplateManager();
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
     public static final int HTTP_CACHE_SECONDS = 60;
 
-    public ServerHandler(RouteManager container) {
-        this.routes = container;
-    }
-
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
+        
+        //Get the route manager
+        RouteManager routeManager = ctx.channel().attr(Server.routeManager).get();
 
         if (!request.getDecoderResult().isSuccess()) {
             sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
             return;
         }
 
-        Route target = routes.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
+        Route target = routeManager.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
 
         //Check that we the target of the route
         if (target != null) {            //Handle the message

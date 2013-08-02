@@ -7,15 +7,8 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import torch.route.RouteManager;
 
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
-    
-    private RouteManager container = null;
-    
-    public ServerInitializer(RouteManager container) {
-        this.container = container;
-    }
     
     @Override
     public void initChannel(SocketChannel ch) throws Exception {
@@ -25,6 +18,6 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast("aggregator", new HttpObjectAggregator(1048576));
         pipeline.addLast("encoder", new HttpResponseEncoder()); 
         pipeline.addLast("streamer", new ChunkedWriteHandler());
-        pipeline.addLast("handler", new ServerHandler(container));
+        pipeline.addLast("handler", new ServerHandler());
     }
 }
