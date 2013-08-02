@@ -14,7 +14,7 @@ import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
-import static io.netty.handler.codec.http.HttpHeaders.Names.*;
+import io.netty.handler.codec.http.HttpHeaders.Names;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
@@ -100,25 +100,23 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                 fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(templateText.toString(), CharsetUtil.UTF_8));
             }
 
-            fullresponse.headers().set(CONTENT_TYPE, response.getContentType());
+            fullresponse.headers().set(Names.CONTENT_TYPE, response.getContentType());
 
             //Setting the new cookies
             for (Object pairs : response.getCookieData()) {
                 Cookie obj = ((Map.Entry<String, Cookie>) pairs).getValue();
 
-                fullresponse.headers().add(SET_COOKIE, ServerCookieEncoder.encode(obj.getName(), obj.getValue()));
+                fullresponse.headers().add(Names.SET_COOKIE, ServerCookieEncoder.encode(obj.getName(), obj.getValue()));
             }
 
             // Write the response.
             ctx.write(fullresponse);
         } else {
             File file = new File("public" + request.getUri());
-            
-            System.out.println("FILE REQUEST: "+file.getPath());
 
             if (file.exists() && file.isFile()) {
                 // Cache Validation
-                String ifModifiedSince = request.headers().get(IF_MODIFIED_SINCE);
+                String ifModifiedSince = request.headers().get(Names.IF_MODIFIED_SINCE);
                 if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
                     SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
                     Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince);
@@ -132,79 +130,76 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                         return;
                     }
                 }
-                
+
                 RandomAccessFile raf;
-        try {
-            raf = new RandomAccessFile(file, "r");
-        } catch (FileNotFoundException fnfe) {
-            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND);
-            return;
-        }
-        long fileLength = raf.length();
-
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        HttpHeaders.setContentLength(response, fileLength);
-        setContentTypeHeader(response, file);
-        setDateAndCacheHeaders(response, file);
-        if (HttpHeaders.isKeepAlive(request)) {
-            response.headers().set(CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-        }
-
-        // Write the initial line and the header.
-        ctx.write(response);
-
-        // Write the content.
-        ChannelFuture sendFileFuture;
-        if (useSendFile) {
-            sendFileFuture =
-                    ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
-        } else {
-            sendFileFuture =
-                    ctx.write(new ChunkedFile(raf, 0, fileLength, 8192), ctx.newProgressivePromise());
-        }
-
-        sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
-            @Override
-            public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
-                if (total < 0) { // total unknown
-                    System.err.println("Transfer progress: " + progress);
-                } else {
-                    System.err.println("Transfer progress: " + progress + " / " + total);
+                try {
+                    raf = new RandomAccessFile(file, "r");
+                } catch (FileNotFoundException fnfe) {
+                    sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND);
+                    return;
                 }
-            }
+                long fileLength = raf.length();
 
-            @Override
-            public void operationComplete(ChannelProgressiveFuture future) throws Exception {
-                System.err.println("Transfer complete.");
-            }
-        });
+                HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                HttpHeaders.setContentLength(response, fileLength);
+                setContentTypeHeader(response, file);
+                setDateAndCacheHeaders(response, file);
+                if (HttpHeaders.isKeepAlive(request)) {
+                    response.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+                }
 
-        // Write the end marker
-        ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+                // Write the initial line and the header.
+                ctx.write(response);
 
-        // Decide whether to close the connection or not.
-        if (!HttpHeaders.isKeepAlive(request)) {
-            // Close the connection when the whole content is written out.
-            lastContentFuture.addListener(ChannelFutureListener.CLOSE);
-        }
+                // Write the content.
+                ChannelFuture sendFileFuture;
+                if (useSendFile) {
+                    sendFileFuture =
+                            ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
+                } else {
+                    sendFileFuture =
+                            ctx.write(new ChunkedFile(raf, 0, fileLength, 8192), ctx.newProgressivePromise());
+                }
+
+                sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
+                    @Override
+                    public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
+                        if (total < 0) { // total unknown
+                            System.err.println("Transfer progress: " + progress);
+                        } else {
+                            System.err.println("Transfer progress: " + progress + " / " + total);
+                        }
+                    }
+
+                    @Override
+                    public void operationComplete(ChannelProgressiveFuture future) throws Exception {
+                        System.err.println("Transfer complete.");
+                    }
+                });
+
+                // Write the end marker
+                ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+
+                // Decide whether to close the connection or not.
+                if (!HttpHeaders.isKeepAlive(request)) {
+                    // Close the connection when the whole content is written out.
+                    lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+                }
             } else {
                 //Send back not found 404
                 sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND);
             }
         }
+        ctx.flush();
+        ctx.close();
     }
 
     private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status) {
         FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("404 Not found!", CharsetUtil.UTF_8));
 
-        fullresponse.headers().set(CONTENT_TYPE, "text/html; charset=UTF-8");
+        fullresponse.headers().set(Names.CONTENT_TYPE, "text/html; charset=UTF-8");
 
         ctx.write(fullresponse);
-    }
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ctx.flush();
     }
 
     @Override
@@ -212,12 +207,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
         cause.printStackTrace(System.out);
         ctx.close();
     }
-    
+
     /**
      * When file timestamp is the same as what the browser is sending up, send a "304 Not Modified"
      *
      * @param ctx
-     *            Context
+     * Context
      */
     private static void sendNotModified(ChannelHandlerContext ctx) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED);
@@ -225,27 +220,29 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
 
         // Close the connection as soon as the error message is sent.
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-    }/**
+    }
+
+    /**
      * Sets the Date header for the HTTP response
      *
      * @param response
-     *            HTTP response
+     * HTTP response
      */
     private static void setDateHeader(FullHttpResponse response) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
         dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
 
         Calendar time = new GregorianCalendar();
-        response.headers().set(DATE, dateFormatter.format(time.getTime()));
+        response.headers().set(Names.DATE, dateFormatter.format(time.getTime()));
     }
 
     /**
      * Sets the Date and Cache headers for the HTTP Response
      *
      * @param response
-     *            HTTP response
+     * HTTP response
      * @param fileToCache
-     *            file to extract content type
+     * file to extract content type
      */
     private static void setDateAndCacheHeaders(HttpResponse response, File fileToCache) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
@@ -253,26 +250,25 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
 
         // Date header
         Calendar time = new GregorianCalendar();
-        response.headers().set(DATE, dateFormatter.format(time.getTime()));
+        response.headers().set(Names.DATE, dateFormatter.format(time.getTime()));
 
         // Add cache headers
         time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
-        response.headers().set(EXPIRES, dateFormatter.format(time.getTime()));
-        response.headers().set(CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
-        response.headers().set(
-                LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
+        response.headers().set(Names.EXPIRES, dateFormatter.format(time.getTime()));
+        response.headers().set(Names.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
+        response.headers().set(Names.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
     }
 
     /**
      * Sets the content type header for the HTTP Response
      *
      * @param response
-     *            HTTP response
+     * HTTP response
      * @param file
-     *            file to extract content type
+     * file to extract content type
      */
     private static void setContentTypeHeader(HttpResponse response, File file) {
         MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
-        response.headers().set(CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
+        response.headers().set(Names.CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
     }
 }
