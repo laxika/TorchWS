@@ -6,8 +6,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelProgressiveFuture;
-import io.netty.channel.ChannelProgressiveFutureListener;
 import io.netty.channel.DefaultFileRegion;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -154,24 +152,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                 // Write the initial line and the header.
                 ctx.write(response);
 
-                // Write the content.
-                ChannelFuture sendFileFuture = ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
-
-                sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
-                    @Override
-                    public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
-                        if (total < 0) { // total unknown
-                            System.err.println("Transfer progress: " + progress);
-                        } else {
-                            System.err.println("Transfer progress: " + progress + " / " + total);
-                        }
-                    }
-
-                    @Override
-                    public void operationComplete(ChannelProgressiveFuture future) throws Exception {
-                        System.err.println("Transfer complete.");
-                    }
-                });
+                ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
 
                 // Write the end marker
                 ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
