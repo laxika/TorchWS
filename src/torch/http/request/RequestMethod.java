@@ -1,4 +1,4 @@
-package torch.http;
+package torch.http.request;
 
 import io.netty.handler.codec.http.HttpMethod;
 
