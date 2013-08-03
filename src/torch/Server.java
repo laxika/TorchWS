@@ -1,5 +1,6 @@
 package torch;
 
+import torch.util.ChannelVariable;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;

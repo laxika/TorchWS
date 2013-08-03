@@ -1,5 +1,6 @@
 package torch;
 
+import torch.util.ChannelVariable;
 import freemarker.template.Template;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;

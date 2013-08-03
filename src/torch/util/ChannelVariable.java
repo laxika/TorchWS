@@ -1,4 +1,4 @@
-package torch;
+package torch.util;
 
 import io.netty.util.AttributeKey;
 
