@@ -55,7 +55,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-        
+
         //Check that the request was successfull
         if (validateRequest(request)) {
             sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
@@ -92,6 +92,14 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                 temp.process(webpage.getTemplateRoot(), templateText);
 
                 fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(templateText.toString(), CharsetUtil.UTF_8));
+            }
+
+            if (HttpHeaders.isKeepAlive(request)) {
+                // Add 'Content-Length' header only for a keep-alive connection.
+                fullresponse.headers().set(Names.CONTENT_LENGTH, fullresponse.content().readableBytes());
+                // Add keep alive header as per:
+                // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
+                fullresponse.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
             }
 
             fullresponse.headers().set(Names.CONTENT_TYPE, response.getContentType());
@@ -178,16 +186,15 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
             }
         }
         ctx.flush();
-        ctx.close();
     }
 
     private boolean validateRequest(FullHttpRequest request) {
         return !request.getDecoderResult().isSuccess();
     }
-    
+
     private Route calculateRouteFromRequest(ChannelHandlerContext ctx, FullHttpRequest request) {
         RouteManager routeManager = (RouteManager) ctx.channel().attr(ChannelVariable.ROUTE_MANAGER.getVariableKey()).get();
-        
+
         return routeManager.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
     }
 
