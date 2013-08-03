@@ -5,14 +5,16 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import torch.route.RouteManager;
+import torch.util.Configuration;
 
 /**
  * Initialize the server.
  */
 public class Server {
 
-    private static final RouteManager container = new RouteManager();
-
+    private final RouteManager container = new RouteManager();
+    private final Configuration config = new Configuration();
+    
     /**
      * Start the server. Call this method after setting up every configuration/routes correctly.
      *
@@ -31,7 +33,7 @@ public class Server {
 
             serverBootstrap.childAttr(ChannelVariable.ROUTE_MANAGER.getVariableKey(), container);
 
-            serverBootstrap.bind(8080).sync().channel().closeFuture().sync();
+            serverBootstrap.bind(config.getInt("listener.port")).sync().channel().closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
