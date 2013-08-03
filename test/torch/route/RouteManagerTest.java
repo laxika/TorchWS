@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import torch.example.routing.HelloWorldExactRoute;
 import torch.example.routing.HelloWorldWithOneVar;
 import torch.example.routing.HelloWorldWithTwoVar;
-import torch.http.RequestMethod;
+import torch.http.request.RequestMethod;
 
 public class RouteManagerTest {
 

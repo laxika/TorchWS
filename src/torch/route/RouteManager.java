@@ -2,7 +2,7 @@ package torch.route;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import torch.http.RequestMethod;
+import torch.http.request.RequestMethod;
 import torch.route.container.DynamicRouteContainer;
 import torch.route.container.StaticRouteContainer;
 import torch.util.ArrayUtils;

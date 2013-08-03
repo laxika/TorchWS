@@ -2,7 +2,7 @@ package torch.route;
 
 import java.util.HashMap;
 import org.testng.annotations.Test;
-import torch.http.RequestMethod;
+import torch.http.request.RequestMethod;
 
 public class RouteTest {
 

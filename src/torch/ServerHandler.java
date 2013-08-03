@@ -34,7 +34,7 @@ import java.util.TimeZone;
 import javax.activation.MimetypesFileTypeMap;
 import torch.cookie.Cookie;
 import torch.handler.WebPage;
-import torch.http.RequestMethod;
+import torch.http.request.RequestMethod;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
 import torch.route.Route;
@@ -108,6 +108,13 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
                 Cookie obj = ((Map.Entry<String, Cookie>) pairs).getValue();
 
                 fullresponse.headers().add(Names.SET_COOKIE, ServerCookieEncoder.encode(obj.getName(), obj.getValue()));
+            }
+            
+            //Setting the headers
+            for (Object pairs : response.getHeaderData()) {
+                Map.Entry<String, String> obj = (Map.Entry<String, String>) pairs;
+
+                fullresponse.headers().add(obj.getKey(), obj.getValue());
             }
 
             // Write the response.

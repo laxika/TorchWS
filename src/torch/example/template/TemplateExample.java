@@ -18,7 +18,7 @@ public class TemplateExample extends WebPage implements Templateable {
 
     @Override
     public String getTemplate() {
-        return "example/TemplateExample.tpl";
+        return "example/template/example.tpl";
     }
 
     @Override

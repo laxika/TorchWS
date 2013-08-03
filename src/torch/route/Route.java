@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import torch.handler.WebPage;
-import torch.http.RequestMethod;
+import torch.http.request.RequestMethod;
 
 public class Route {
 
