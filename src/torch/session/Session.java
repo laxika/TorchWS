@@ -30,4 +30,8 @@ public class Session {
     public boolean isSessionVariableSet(String name) {
         return sessionVariables.containsKey(name);
     }
+    
+    public void clearSessionVariables() {
+        sessionVariables.clear();
+    }
 }

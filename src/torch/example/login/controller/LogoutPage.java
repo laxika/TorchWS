@@ -11,7 +11,7 @@ public class LogoutPage extends WebPage {
     @Override
     public void handle(TorchHttpRequest request, TorchHttpResponse response, Session session) {
         //Remove the user session
-        session.setSessionVariable("userid", null);
+        session.clearSessionVariables();
         
         //Redirect the user
         response.getHeaderData().setHeader(HttpHeaders.Names.LOCATION, "/");
