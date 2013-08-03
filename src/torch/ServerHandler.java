@@ -44,6 +44,7 @@ import torch.route.RouteManager;
 import torch.session.Session;
 import torch.session.SessionManager;
 import torch.template.TemplateManager;
+import torch.template.Templateable;
 
 public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
@@ -82,16 +83,16 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
             webpage.handle(torchreq, response, session);
 
             FullHttpResponse fullresponse;
-            if (webpage.getTemplate() == null) {
-                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
-            } else {
-                Template temp = templateManager.getTemplate(webpage.getTemplate());
+            if (webpage instanceof Templateable) {
+                Template temp = templateManager.getTemplate(((Templateable) webpage).getTemplate());
 
                 StringWriter templateText = new StringWriter();
 
-                temp.process(webpage.getTemplateRoot(), templateText);
+                temp.process(((Templateable) webpage).getTemplateRoot(), templateText);
 
                 fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(templateText.toString(), CharsetUtil.UTF_8));
+            } else {
+                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
             }
 
             if (HttpHeaders.isKeepAlive(request)) {

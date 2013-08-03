@@ -4,9 +4,10 @@ import torch.handler.WebPage;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
 import torch.session.Session;
+import torch.template.Templateable;
 
-public class TemplateExample extends WebPage{
-    
+public class TemplateExample extends WebPage implements Templateable {
+
     public TemplateRoot templateRoot = new TemplateRoot();
 
     @Override
@@ -14,12 +15,12 @@ public class TemplateExample extends WebPage{
         templateRoot.getUser().setUsername("TestUser");
         templateRoot.getUser().setExtrainfo("You think that Laxika is the best guy ever!");
     }
-    
+
     @Override
     public String getTemplate() {
         return "example/TemplateExample.tpl";
     }
-    
+
     @Override
     public Object getTemplateRoot() {
         return templateRoot;
