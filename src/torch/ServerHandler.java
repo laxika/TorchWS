@@ -56,18 +56,16 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         
-        //Get the route manager
-        RouteManager routeManager = (RouteManager) ctx.channel().attr(ChannelVariable.ROUTE_MANAGER.getVariableKey()).get();
-
-        if (!request.getDecoderResult().isSuccess()) {
+        //Check that the request was successfull
+        if (validateRequest(request)) {
             sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
             return;
         }
 
-        Route target = routeManager.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
+        Route target = calculateRouteFromRequest(ctx, request);
 
         //Check that we the target of the route
-        if (target != null) {            //Handle the message
+        if (target != null) {
             TorchHttpResponse response = new TorchHttpResponse();
             TorchHttpRequest torchreq = new TorchHttpRequest(request, target);
 
@@ -183,6 +181,16 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
         ctx.close();
     }
 
+    private boolean validateRequest(FullHttpRequest request) {
+        return !request.getDecoderResult().isSuccess();
+    }
+    
+    private Route calculateRouteFromRequest(ChannelHandlerContext ctx, FullHttpRequest request) {
+        RouteManager routeManager = (RouteManager) ctx.channel().attr(ChannelVariable.ROUTE_MANAGER.getVariableKey()).get();
+        
+        return routeManager.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
+    }
+
     private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status) {
         FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("404 Not found!", CharsetUtil.UTF_8));
 
@@ -198,10 +206,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     }
 
     /**
-     * When file timestamp is the same as what the browser is sending up, send a "304 Not Modified"
+     * When file timestamp is the same as what the browser is sending up, send a
+     * "304 Not Modified"
      *
-     * @param ctx
-     * Context
+     * @param ctx Context
      */
     private static void sendNotModified(ChannelHandlerContext ctx) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED);
@@ -214,8 +222,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     /**
      * Sets the Date header for the HTTP response
      *
-     * @param response
-     * HTTP response
+     * @param response HTTP response
      */
     private static void setDateHeader(FullHttpResponse response) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
@@ -228,10 +235,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     /**
      * Sets the Date and Cache headers for the HTTP Response
      *
-     * @param response
-     * HTTP response
-     * @param fileToCache
-     * file to extract content type
+     * @param response HTTP response
+     * @param fileToCache file to extract content type
      */
     private static void setDateAndCacheHeaders(HttpResponse response, File fileToCache) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
@@ -251,10 +256,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     /**
      * Sets the content type header for the HTTP Response
      *
-     * @param response
-     * HTTP response
-     * @param file
-     * file to extract content type
+     * @param response HTTP response
+     * @param file file to extract content type
      */
     private static void setContentTypeHeader(HttpResponse response, File file) {
         MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
