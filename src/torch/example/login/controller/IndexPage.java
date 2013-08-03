@@ -18,14 +18,6 @@ public class IndexPage extends WebPage implements Templateable {
         if(session.isSessionVariableSet("userid")) {
             indexData.setUsername("admin"); //query the real username from the db here
         }
-        
-//        if (!session.isSessionVariableSet("userid")) {
-//            response.appendContent("<html><head><title>Hello!</title></head>"
-//                    + "<body>Welcome on our awesome website! Please login <a href=\"/login\">here</a>!</body></html>");
-//        } else {
-//            response.appendContent("<html><head><title>Hello!</title></head>"
-//                    + "<body>Welcome on our awesome website dear user! You are officially logged in! :) Logout <a href=\"/logout\">here!</a></body></html>");
-//        }
     }
 
     @Override

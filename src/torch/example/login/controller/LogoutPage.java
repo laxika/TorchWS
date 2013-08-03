@@ -1,6 +1,5 @@
 package torch.example.login.controller;
 
-import io.netty.handler.codec.http.HttpHeaders;
 import torch.handler.WebPage;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
@@ -14,6 +13,6 @@ public class LogoutPage extends WebPage {
         session.clearSessionVariables();
         
         //Redirect the user
-        response.getHeaderData().setHeader(HttpHeaders.Names.LOCATION, "/");
+        response.redirect("/");
     }
 }

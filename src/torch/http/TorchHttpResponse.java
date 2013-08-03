@@ -1,6 +1,5 @@
 package torch.http;
 
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders.Names;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import torch.cookie.ReadWriteCookieStorage;
@@ -23,10 +22,6 @@ public class TorchHttpResponse {
     }
 
     public HttpResponseStatus getStatus() {
-        if(headerStorage.getHeader(Names.LOCATION) != null) {
-            return HttpResponseStatus.SEE_OTHER;
-        }
-        
         return status;
     }
 
@@ -54,5 +49,13 @@ public class TorchHttpResponse {
     
     public ReadWriteHeaderStorage getHeaderData() {
         return headerStorage;
+    }
+    
+    public void redirect(String target) {
+        //Set the status to 303 (see other)
+        status = HttpResponseStatus.SEE_OTHER;
+        
+        //Add the location header
+        headerStorage.setHeader(Names.LOCATION, target);
     }
 }

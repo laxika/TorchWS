@@ -1,6 +1,5 @@
 package torch.example.login.controller;
 
-import io.netty.handler.codec.http.HttpHeaders.Names;
 import torch.handler.WebPage;
 import torch.http.request.RequestMethod;
 import torch.http.TorchHttpRequest;
@@ -14,7 +13,7 @@ public class LoginPage extends WebPage implements Templateable {
     public void handle(TorchHttpRequest request, TorchHttpResponse response, Session session) {
         //User already logged in
         if(session.isSessionVariableSet("userid")) {
-            response.getHeaderData().setHeader(Names.LOCATION, "/");
+            response.redirect("/");
             return;
         }
         
@@ -23,7 +22,7 @@ public class LoginPage extends WebPage implements Templateable {
             if("admin".equals(request.getPostData().getValue("username")) && "admin".equals(request.getPostData().getValue("password"))) {
                 session.setSessionVariable("userid", 1); //1th user is the admin, use real userid here
                 
-                response.getHeaderData().setHeader(Names.LOCATION, "/");
+                response.redirect("/");
             }
         }
     }
