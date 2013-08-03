@@ -2,7 +2,7 @@
     <head>
         <title>Hello!</title>
 
-        <link href="/css/bootstrap-v3.0.0.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css" rel="stylesheet">
 
         <style>
             body {
