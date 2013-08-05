@@ -11,16 +11,16 @@ This tutorial show you how to create the simplest TorchWS program, the 'Hello Wo
 The base of TorchWS is it's routing system. First create a new Server instance.
 
 ``` Java
-Server server = new Server();
+Server torch = new Server();
 ```
 
-This will initialize the server on 8080 port by default. We have the server initialized, time to add some routes.
+This will initialize the server on 8080 port by default. You have the server initialized, it's time to add some routes.
 
 ``` Java
 torch.getRouteManager().defineRoute("/hello", HelloWorld.class);
 ```
 
-We declared our first route. This line will make the server route the request for /hello to the HelloWorld class. So let's create the controller class too.
+Congratulations you have defined your first route. This line will make the server route the request for /hello to the HelloWorld class. So let's create the controller class too.
 
 ``` Java
 import torch.handler.WebPage;
@@ -37,6 +37,8 @@ public class HelloWorld extends WebPage {
 }
 ```
 
-In Torch, every controller extends the `WebPage` class and override the default handle method. For now we only add some plain text to the response by the `response.appendContent` method. The handle method has tree variables, the 'request' store everything what we get from the client when that request a new webpage, the response is what we'll send to the client, and the session is the actual session. You don't need to manually start a session like in PHP, it's started automatically at the client's first connectation.
+In Torch, every controller extends the `WebPage` class and override the default handle method. For now we only add some plain text to the response by the `response.appendContent` method. The handle method has tree variables, the 'request' store everything what we get from the client when it's request a new webpage, the response is what we'll send to the client, and the session is the actual session. You don't need to manually start a session like in PHP, it's started automatically at the client's first connectation. For more info on the sessions please visit this link:
+
+http://en.wikipedia.org/wiki/Session_(computer_science)#Web_server_session_management
 
 Now our server is ready to run, so feel free to run it and then call http://127.0.0.1:8080/hello to see the results.
