@@ -2,7 +2,7 @@
 
 **TorchWS is a powerful yet easy to use and lightweight java web framework.**
 
-*For detiled examples, check the src/example package. The package is in alpha state at the moment, so API breaks can happen without any further notice.*
+*For detiled examples, check the src/example package. The framework is in alpha state at the moment, so API breaks can happen without any further notice.*
 
 ## Getting started
 
