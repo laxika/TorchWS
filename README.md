@@ -37,8 +37,11 @@ public class HelloWorld extends WebPage {
 }
 ```
 
-In Torch, every controller extends the `WebPage` class and override the default handle method. For now we only add some plain text to the response by the `response.appendContent` method. The handle method has tree variables, the 'request' store everything what we get from the client when it's request a new webpage, the response is what we'll send to the client, and the session is the actual session. You don't need to manually start a session like in PHP, it's started automatically at the client's first connectation. For more info on the sessions please visit this link:
+In Torch, every controller extends the `WebPage` class and override the default `handle` method. For now we only add some plain text to the response by the `response.appendContent` method. The handle method has tree variables, the 'request' store everything what we get from the client when it's request a new webpage, the response is what we'll send to the client, and the session is the actual session. You don't need to manually start a session like in PHP, it's started automatically at the client's first connectation. For more info on the sessions please visit this link:
 
 http://en.wikipedia.org/wiki/Session_(computer_science)#Web_server_session_management
 
 Now our server is ready to run, so feel free to run it and then call http://127.0.0.1:8080/hello to see the results.
+
+## More about the routing
+
