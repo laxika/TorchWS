@@ -41,7 +41,38 @@ In Torch, every controller extends the `WebPage` class and override the default 
 
 http://en.wikipedia.org/wiki/Session_(computer_science)#Web_server_session_management
 
-Now our server is ready to run, so feel free to run it and then call http://127.0.0.1:8080/hello to see the results.
+Now your server is ready to run, so feel free to run it and then call http://127.0.0.1:8080/hello to see the results.
 
 ## More about the routing
 
+The routing in Torch is pretty complex. You can define routes as you saw in the previous section but not only that, you can also add variables to your routes. For example:
+
+``` Java
+torch.getRouteManager().defineRoute("/hello/@variable1/@variable2/", HelloWorldWithTwoVar.class);
+```
+
+The variables in the uris starts with `@` so you declare two variables in this method. The first variable is called `@variable1` and the second one is `@variable2`.
+
+You can also mix non variables and variables in any order in a given route, for example:
+
+``` Java
+torch.getRouteManager().defineRoute("/hello/@variable1/lol/", HelloWorldWithOneVar.class);
+```
+
+Okey, so you can declare variables in the routes, but how can you access them? Accessing them is really easy:
+
+``` Java
+request.getRouteData().getValue("variable1")
+```
+
+You can use routing variables to create SEO links and so on. Imagine that you plan to do an item database for roleplaying games. You can define a route like this: `/@gamename/@itemtype/@itemname` and match them to something like `/supermmorpg/weapon/blade-of-the-programmers`.
+
+The routing order is easy too:
+
+``` Java
+torch.getRouteManager().defineRoute("/hello/@variable1/@variable2/", HelloWorldWithTwoVar.class);
+torch.getRouteManager().defineRoute("/hello/@variable1/lol/", HelloWorldWithOneVar.class);
+torch.getRouteManager().defineRoute("/hello/exact/route", HelloWorldExactRoute.class);
+```
+
+The `/hello/smthing/lol` will route to the `HelloWorldWithOneVar` class while the `/hello/thisis/stupid` will route to the `HelloWorldWithTwoVar` class.
