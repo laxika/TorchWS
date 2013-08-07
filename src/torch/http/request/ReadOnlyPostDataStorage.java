@@ -9,11 +9,10 @@ import io.netty.handler.codec.http.multipart.MemoryAttribute;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-public class ReadOnlyPostDataStorage implements Iterable {
+public class ReadOnlyPostDataStorage implements Iterable<PostVariable> {
 
-    private HashMap<String, String> postVariableStorage = new HashMap<>();
+    private HashMap<String, PostVariable> postVariableStorage = new HashMap<>();
 
     public ReadOnlyPostDataStorage(HttpRequest request) {
         if (request.getMethod() == HttpMethod.POST) {
@@ -24,18 +23,18 @@ public class ReadOnlyPostDataStorage implements Iterable {
                 if (interf.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
                     MemoryAttribute attribute = (MemoryAttribute) interf;
 
-                    postVariableStorage.put(attribute.getName(), attribute.getValue());
+                    postVariableStorage.put(attribute.getName(), new PostVariable(attribute.getName(), attribute.getValue()));
                 }
             }
         }
     }
 
-    public String getValue(String name) {
+    public PostVariable getVariable(String name) {
         return postVariableStorage.get(name);
     }
 
     @Override
-    public Iterator<Map.Entry<String, String>> iterator() {
-        return postVariableStorage.entrySet().iterator();
+    public Iterator<PostVariable> iterator() {
+        return postVariableStorage.values().iterator();
     }
 }

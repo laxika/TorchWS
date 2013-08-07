@@ -13,7 +13,7 @@ public class ReadOnlyRouteDataStorage implements Iterable<RouteVariable> {
         this.urlVariableStorage = route.calculateVariablesValuesFromUrl(uri);
     }
 
-    public RouteVariable getValue(String name) {
+    public RouteVariable getVariable(String name) {
         return urlVariableStorage.get(name);
     }
 

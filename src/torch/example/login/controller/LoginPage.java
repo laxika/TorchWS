@@ -19,7 +19,7 @@ public class LoginPage extends WebPage implements Templateable {
         
         if (request.getMethod() == RequestMethod.POST) {
             //Validate the password/username
-            if("admin".equals(request.getPostData().getValue("username")) && "admin".equals(request.getPostData().getValue("password"))) {
+            if("admin".equals(request.getPostData().getVariable("username").getValue()) && "admin".equals(request.getPostData().getVariable("password").getValue())) {
                 session.setSessionVariable("userid", 1); //1th user is the admin, use real userid here
                 
                 response.redirect("/");
