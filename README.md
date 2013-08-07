@@ -62,8 +62,10 @@ torch.getRouteManager().defineRoute("/hello/@variable1/lol/", HelloWorldWithOneV
 Okey, so you can declare variables in the routes, but how can you access them? Accessing them is really easy:
 
 ``` Java
-request.getRouteData().getValue("variable1")
+request.getRouteData().getValue("variable1");
 ```
+
+This will return you a `RouteVariable` object. You can call `getName()` and `getValue()` on it to get it's name/value.
 
 You can use routing variables to create SEO links and so on. Imagine that you plan to do an item database for roleplaying games. You can define a route like this: `/@gamename/@itemtype/@itemname` and match them to something like `/supermmorpg/weapon/blade-of-the-programmers`.
 
@@ -76,3 +78,13 @@ torch.getRouteManager().defineRoute("/hello/exact/route", HelloWorldExactRoute.c
 ```
 
 The `/hello/smthing/lol` will route to the `HelloWorldWithOneVar` class while the `/hello/thisis/stupid` will route to the `HelloWorldWithTwoVar` class.
+
+You can also iterate over the routing variables this way:
+
+``` Java
+for (Object obj : request.getRouteData()) {
+    RouteVariable routeVar = (RouteVariable) obj;
+
+    response.appendContent("Route var: <b>" + routeVar.getName() + "</b> = '" + routeVar.getValue()+"'<br>");
+}
+```
