@@ -2,9 +2,8 @@ package torch.cookie;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
-public class ReadWriteCookieStorage implements Iterable {
+public class ReadWriteCookieStorage implements Iterable<CookieVariable> {
 
     public HashMap<String, CookieVariable> cookieStorage = new HashMap<>();
 
@@ -15,9 +14,9 @@ public class ReadWriteCookieStorage implements Iterable {
     public CookieVariable getCookie(String name) {
         return cookieStorage.get(name);
     }
-    
+
     @Override
-    public Iterator<Map.Entry<String, CookieVariable>> iterator() {
-        return cookieStorage.entrySet().iterator();
+    public Iterator<CookieVariable> iterator() {
+        return cookieStorage.values().iterator();
     }
 }

@@ -3,10 +3,9 @@ package torch.cookie;
 import io.netty.handler.codec.http.CookieDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Set;
 
-public class ReadOnlyCookieDataStorage implements Iterable {
+public class ReadOnlyCookieDataStorage implements Iterable<CookieVariable> {
 
     private HashMap<String, CookieVariable> cookieStorage = new HashMap<>();
 
@@ -25,7 +24,7 @@ public class ReadOnlyCookieDataStorage implements Iterable {
     }
 
     @Override
-    public Iterator<Entry<String, CookieVariable>> iterator() {
-        return cookieStorage.entrySet().iterator();
+    public Iterator<CookieVariable> iterator() {
+        return cookieStorage.values().iterator();
     }
 }
