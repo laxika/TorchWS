@@ -82,9 +82,7 @@ The `/hello/smthing/lol` will route to the `HelloWorldWithOneVar` class while th
 You can also iterate over the routing variables this way:
 
 ``` Java
-for (Object obj : request.getRouteData()) {
-    RouteVariable routeVar = (RouteVariable) obj;
-
+for (RouteVariable routeVar : request.getRouteData()) {
     response.appendContent("Route var: <b>" + routeVar.getName() + "</b> = '" + routeVar.getValue()+"'<br>");
 }
 ```
