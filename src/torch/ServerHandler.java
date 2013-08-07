@@ -32,7 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import javax.activation.MimetypesFileTypeMap;
-import torch.cookie.Cookie;
+import torch.cookie.CookieVariable;
 import torch.handler.WebPage;
 import torch.http.request.RequestMethod;
 import torch.http.TorchHttpRequest;
@@ -73,7 +73,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
             //New session
             if (session == null) {
                 session = sessionManager.startNewSession();
-                response.getCookieData().addCookie(new Cookie("SESSID", session.getSessionId()));
+                response.getCookieData().addCookie(new CookieVariable("SESSID", session.getSessionId()));
             }
 
             //Instantiate a new WebPage object and handle the request
@@ -105,7 +105,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
 
             //Setting the new cookies
             for (Object pairs : response.getCookieData()) {
-                Cookie obj = ((Map.Entry<String, Cookie>) pairs).getValue();
+                CookieVariable obj = ((Map.Entry<String, CookieVariable>) pairs).getValue();
 
                 fullresponse.headers().add(Names.SET_COOKIE, ServerCookieEncoder.encode(obj.getName(), obj.getValue()));
             }

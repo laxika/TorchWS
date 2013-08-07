@@ -3,7 +3,6 @@ package torch.route;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
-import torch.handler.WebPage;
 import torch.http.request.RequestMethod;
 
 public class Route {
@@ -40,7 +39,7 @@ public class Route {
     public Class getTarget() {
         return target;
     }
-    
+
     public RequestMethod getMethod() {
         return method;
     }
@@ -56,16 +55,16 @@ public class Route {
     public ArrayList<Integer> getDynamicVariablePositions() {
         return dynamicVariablePositions;
     }
-    
-    public HashMap<String,String> calculateVariablesValuesFromUrl(String url) {
+
+    public HashMap<String, RouteVariable> calculateVariablesValuesFromUrl(String url) {
         String[] urlParts = url.split("/");
-        
-        HashMap<String,String> result = new HashMap<>();
-        
-        for(int position : dynamicVariablePositions) {
-            result.put(routingHops[position], urlParts[position]);
+
+        HashMap<String, RouteVariable> result = new HashMap<>();
+
+        for (int position : dynamicVariablePositions) {
+            result.put(routingHops[position], new RouteVariable(routingHops[position], urlParts[position]));
         }
-        
+
         return result;
     }
 
@@ -75,7 +74,7 @@ public class Route {
         hash = 53 * hash + Objects.hashCode(routingUri);
         return hash;
     }
-    
+
     @Override
     public boolean equals(Object o) {
         return o instanceof Route && ((Route) o).routingUri.equals(this.routingUri);

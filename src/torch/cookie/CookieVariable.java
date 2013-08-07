@@ -1,16 +1,16 @@
 package torch.cookie;
 
-public class Cookie {
+public class CookieVariable {
     private final String name;
     private String value;
     private boolean fresh = false;
     
-    public Cookie(String name, String value) {
+    public CookieVariable(String name, String value) {
         this.name = name;
         this.value = value;
     }
     
-    public Cookie(String name, String value, boolean fresh) {
+    public CookieVariable(String name, String value, boolean fresh) {
         this.name = name;
         this.value = value;
         this.fresh = fresh;

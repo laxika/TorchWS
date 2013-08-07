@@ -9,6 +9,6 @@ public class HelloWorldWithTwoVar extends WebPage {
 
     @Override
     public void handle(TorchHttpRequest request, TorchHttpResponse response, Session session) {
-        response.appendContent("This is a route with two variables! Variable1: " + request.getRouteData().getValue("variable1") + " Variable2: " + request.getRouteData().getValue("variable2"));
+        response.appendContent("This is a route with two variables! Variable1: " + request.getRouteData().getValue("variable1").getValue() + " Variable2: " + request.getRouteData().getValue("variable2").getValue());
     }
 }

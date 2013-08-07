@@ -1,11 +1,11 @@
 package torch;
 
-import torch.util.ChannelVariable;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import torch.route.RouteManager;
+import torch.util.ChannelVariable;
 import torch.util.Configuration;
 
 /**

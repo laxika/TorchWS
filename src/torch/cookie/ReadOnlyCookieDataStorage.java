@@ -8,24 +8,24 @@ import java.util.Set;
 
 public class ReadOnlyCookieDataStorage implements Iterable {
 
-    private HashMap<String, Cookie> cookieStorage = new HashMap<>();
+    private HashMap<String, CookieVariable> cookieStorage = new HashMap<>();
 
     public ReadOnlyCookieDataStorage(String cookieString) {
         if (cookieString != null) {
             Set<io.netty.handler.codec.http.Cookie> cookies = CookieDecoder.decode(cookieString);
 
             for (io.netty.handler.codec.http.Cookie cookie : cookies) {
-                cookieStorage.put(cookie.getName(), new Cookie(cookie.getName(), cookie.getValue()));
+                cookieStorage.put(cookie.getName(), new CookieVariable(cookie.getName(), cookie.getValue()));
             }
         }
     }
 
-    public Cookie getCookie(String name) {
+    public CookieVariable getCookie(String name) {
         return cookieStorage.get(name);
     }
 
     @Override
-    public Iterator<Entry<String, Cookie>> iterator() {
+    public Iterator<Entry<String, CookieVariable>> iterator() {
         return cookieStorage.entrySet().iterator();
     }
 }
