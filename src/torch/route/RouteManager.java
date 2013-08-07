@@ -80,7 +80,7 @@ public class RouteManager {
             for (Route actTarget : possibleTargets) {
 
                 //Exact match
-                if (actTarget.getDynamicVariableCount() == 0) {
+                if (actTarget.getDynamicVariableCount() == 0 && actTarget.getHopCount() == routeHops.length) {
                     return actTarget;
                 }
 

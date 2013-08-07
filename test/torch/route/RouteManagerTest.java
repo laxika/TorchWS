@@ -17,6 +17,14 @@ public class RouteManagerTest {
     }
     
     @Test
+    public void testNoVariableInRoute() {
+        testTarget.defineRoute("/hello/exact/route/", HelloWorldExactRoute.class);
+        
+        assert testTarget.calculateRouteByUrl("/hello/exact/route/", RequestMethod.GET).getTarget().equals(HelloWorldExactRoute.class) : "Exact route test 1";
+        assert testTarget.calculateRouteByUrl("/hello", RequestMethod.GET) == null : "Exact route test 2";
+    }
+    
+    @Test
     public void testGetRouteTargetWithDynamicVariables() {
         testTarget.defineRoute("/hello/@variable/@variable2/", HelloWorldWithTwoVar.class);
         
