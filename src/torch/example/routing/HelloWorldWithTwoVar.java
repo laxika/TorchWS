@@ -3,6 +3,7 @@ package torch.example.routing;
 import torch.handler.WebPage;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
+import torch.route.RouteVariable;
 import torch.session.Session;
 
 public class HelloWorldWithTwoVar extends WebPage {
@@ -10,5 +11,12 @@ public class HelloWorldWithTwoVar extends WebPage {
     @Override
     public void handle(TorchHttpRequest request, TorchHttpResponse response, Session session) {
         response.appendContent("This is a route with two variables! Variable1: " + request.getRouteData().getValue("variable1").getValue() + " Variable2: " + request.getRouteData().getValue("variable2").getValue());
+        response.appendContent("<br><br>Route variables listened here to show how to use the iterator with them:<br><br>");
+
+        for (Object obj : request.getRouteData()) {
+            RouteVariable routeVar = (RouteVariable) obj;
+
+            response.appendContent("Route var: <b>" + routeVar.getName() + "</b> = '" + routeVar.getValue()+"'<br>");
+        }
     }
 }
