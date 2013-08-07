@@ -5,7 +5,7 @@ import java.util.Iterator;
 import torch.route.Route;
 import torch.route.RouteVariable;
 
-public class ReadOnlyRouteDataStorage implements Iterable {
+public class ReadOnlyRouteDataStorage implements Iterable<RouteVariable> {
 
     private HashMap<String, RouteVariable> urlVariableStorage = new HashMap<>();
 
