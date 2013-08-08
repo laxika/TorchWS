@@ -175,7 +175,9 @@ To make a `WebPage` templateable implement tha `Templateable` interface and over
 
 The `getTemplate()` method must return the template's path relative to the `template` folder while the `getTemplateRoot()` method must return a java bean what have getters for the variables used in the templates. For more info and templating tutorials check this link: http://freemarker.org/docs/dgui.html
 
+## Static files
 
+Torch can server static files too but if you plan to do a bigger site we suggest you to use a CDN for this task instead. Put your static files to the `public` folder and they will be served if no matching route found for the given uri.
 
 
 
