@@ -157,6 +157,16 @@ And destroying all session variables (it's used mostly to log out/clear the user
 session.clearSessionVariables();
 ```
 
+## Manipulating the response headers
+
+You can also manipulate the response headers this way:
+
+``` Java
+response.getHeaderData().setHeader("headername", "headervalue");
+```
+
+For redirecting you can use `response.redirect("uri");` and for changing the content type use `response.setContentType("application/text");` and for the status use `response.setStatus(HttpResponseStatus.FORBIDDEN);`.
+
 ## Templating engine
 
 Torch has a built in templating engine. You can use the response.appendContent() to manipulate the response content or use templates. (You can't do the both at the same time.) 
