@@ -86,3 +86,15 @@ for (RouteVariable routeVar : request.getRouteData()) {
     response.appendContent("Route var: <b>" + routeVar.getName() + "</b> = '" + routeVar.getValue()+"'<br>");
 }
 ```
+
+## Handling POST requests
+
+Handling POST request is easy in Torch. You can get POST variables by calling `request.getPostData().getVariable("postvarname")`. This will return you a `PostVariable` object. You can call `getName()` and `getValue()` on it to get it's name/value.
+
+You can also iterate over the post variables just like you did with the route variables:
+
+``` Java
+for (PostVariable postVar : request.getPostData()) {
+    response.appendContent("Post var: <b>" + postVar.getName() + "</b> = '" + postVar.getValue()+"'<br>");
+}
+```
