@@ -125,4 +125,26 @@ response.getCookieData().addCookie(new CookieVariable("cookiename","cookievalue"
 
 Timing cookies is not supported yet, but it's a planned feature for the final release.
 
+The `SESSID` cookie name is reserved for the session handling, please don't use it.
 
+## Session management
+
+The Torch server start a new session automatically at the client's first connectation. You don't need to do anything to start sessions, it's all done automatically. At now there is no way to set sessions to expire at a given time and sessions stored in the memory so if you restart the server then all session data is suddenly lost. We are planning session expire time and session id saving to db/file for the final release.
+
+You can set a session variable's value this way:
+
+``` Java
+session.setSessionVariable("userid", 1);
+```
+
+Check if a session variable is set:
+
+``` Java
+session.isSessionVariableSet("userid");
+```
+
+And destroying all session variables (it's used mostly to log out/clear the user):
+
+``` Java
+session.clearSessionVariables();
+```
