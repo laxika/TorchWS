@@ -145,6 +145,12 @@ You can set a session variable's value this way:
 session.setSessionVariable("userid", 1);
 ```
 
+Get a session variable:
+
+``` Java
+session.getSessionVariable("userid");
+```
+
 Check if a session variable is set:
 
 ``` Java
