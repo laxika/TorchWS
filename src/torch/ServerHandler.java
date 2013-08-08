@@ -195,7 +195,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace(System.out);
+        //cause.printStackTrace(System.out); -- enable this only in dev environment!
         ctx.close();
     }
 

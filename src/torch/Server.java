@@ -21,7 +21,7 @@ public class Server {
      *
      * @throws Exception
      */
-    public void run() throws Exception {
+    public void run() throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
