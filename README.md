@@ -87,6 +87,14 @@ for (RouteVariable routeVar : request.getRouteData()) {
 }
 ```
 
+You can also route GET/POST/PUT/DELETE request to different classes (the defines without `RequestMethod` will handle the GET requests):
+
+``` Java
+torch.getRouteManager().defineRoute("/hello/exact/route", HelloWorldExactRoute.class, RequestMethod.POST);
+```
+
+The routing engine will route all POST requests for the `/hello/exact/route` uri to the `HelloWorldExactRoute` class, while the GET requests for the same uri will return a 404 Not Found error.
+
 ## Handling POST requests
 
 Handling POST request is easy in Torch. You can get POST variables by calling `request.getPostData().getVariable("postvarname")`. This will return you a `PostVariable` object. You can call `getName()` and `getValue()` on it to get it's name/value.
