@@ -148,3 +148,16 @@ And destroying all session variables (it's used mostly to log out/clear the user
 ``` Java
 session.clearSessionVariables();
 ```
+
+## Templating engine
+
+Torch has a built in templating engine. You can use the response.appendContent() to manipulate the response content or use templates. (You can't do the both at the same time.) 
+
+To make a `WebPage` templateable implement tha `Templateable` interface and override the `getTemplate()` and `getTemplateRoot()` methods.
+
+The `getTemplate()` method must return the template's path relative to the `template` folder while the `getTemplateRoot()` method must return a java bean what have getters for the variables used in the templates. For more info and templating tutorials check this link: http://freemarker.org/docs/dgui.html
+
+
+
+
+
