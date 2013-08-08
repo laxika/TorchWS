@@ -104,10 +104,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
             fullresponse.headers().set(Names.CONTENT_TYPE, response.getContentType());
 
             //Setting the new cookies
-            for (Object pairs : response.getCookieData()) {
-                CookieVariable obj = ((Map.Entry<String, CookieVariable>) pairs).getValue();
-
-                fullresponse.headers().add(Names.SET_COOKIE, ServerCookieEncoder.encode(obj.getName(), obj.getValue()));
+            for (CookieVariable cookie : response.getCookieData()) {
+                fullresponse.headers().add(Names.SET_COOKIE, ServerCookieEncoder.encode(cookie.getName(), cookie.getValue()));
             }
             
             //Setting the headers
