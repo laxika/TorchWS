@@ -98,3 +98,31 @@ for (PostVariable postVar : request.getPostData()) {
     response.appendContent("Post var: <b>" + postVar.getName() + "</b> = '" + postVar.getValue()+"'<br>");
 }
 ```
+
+## Handling Cookies
+
+Clients can send cookies to the server with every request. We need to handle them. You can get a cookie's value on the same way as a post/route variable's value.
+
+``` Java
+request.getCookieData().getCookie("cookiename");
+```
+
+This will return you a `CookieVariable` object. You can call `getName()` and `getValue()` on it to get it's name/value.
+
+You can also iterate over the cookies just like you did with the route/post variables:
+
+``` Java
+for (CookieVariable cookieVar : request.getCookieData()) {
+    response.appendContent("Cookie var: <b>" + cookieVar.getName() + "</b> = '" + cookieVar.getValue()+"'<br>");
+}
+```
+
+You can create a new cookie and send it with the response this way:
+
+``` Java
+response.getCookieData().addCookie(new CookieVariable("cookiename","cookievalue"));
+```
+
+Timing cookies is not supported yet, but it's a planned feature for the final release.
+
+
