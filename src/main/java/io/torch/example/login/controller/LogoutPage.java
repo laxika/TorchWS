@@ -1,8 +1,8 @@
 package io.torch.example.login.controller;
 
-import io.torch.handler.WebPage;
-import io.torch.http.TorchHttpRequest;
-import io.torch.http.TorchHttpResponse;
+import io.torch.controller.WebPage;
+import io.torch.http.request.TorchHttpRequest;
+import io.torch.http.response.TorchHttpResponse;
 import io.torch.session.Session;
 
 public class LogoutPage extends WebPage {
