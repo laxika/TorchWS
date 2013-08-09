@@ -1,68 +1,54 @@
 package torch;
 
-import torch.util.ChannelVariable;
 import freemarker.template.Template;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.DefaultFileRegion;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders.Names;
-import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.RandomAccessFile;
 import java.io.StringWriter;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
-import javax.activation.MimetypesFileTypeMap;
 import torch.cookie.CookieVariable;
 import torch.handler.WebPage;
-import torch.http.request.RequestMethod;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
+import torch.http.request.RequestMethod;
 import torch.route.Route;
 import torch.route.RouteManager;
 import torch.session.Session;
 import torch.session.SessionManager;
 import torch.template.TemplateManager;
 import torch.template.Templateable;
+import torch.util.ChannelVariable;
 
-public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class ServerHandler extends ChannelInboundHandlerAdapter /*SimpleChannelInboundHandler<FullHttpRequest>*/ {
 
     protected static SessionManager sessionManager = new SessionManager();
     protected static TemplateManager templateManager = new TemplateManager();
-    public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
-    public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
-    public static final int HTTP_CACHE_SECONDS = 60;
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        //Check thet it's a http request
+        if (!(msg instanceof FullHttpRequest)) {
+            return;
+        }
 
-        //Check that the request was successfull
+        FullHttpRequest request = (FullHttpRequest) msg;
+
         if (validateRequest(request)) {
             sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
             return;
         }
-
+        
         Route target = calculateRouteFromRequest(ctx, request);
-
+        
         //Check that we the target of the route
         if (target != null) {
             TorchHttpResponse response = new TorchHttpResponse();
@@ -107,72 +93,21 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
             for (CookieVariable cookie : response.getCookieData()) {
                 fullresponse.headers().add(Names.SET_COOKIE, ServerCookieEncoder.encode(cookie.getName(), cookie.getValue()));
             }
-            
+
             //Setting the headers
             for (Object pairs : response.getHeaderData()) {
                 Map.Entry<String, String> obj = (Map.Entry<String, String>) pairs;
 
                 fullresponse.headers().add(obj.getKey(), obj.getValue());
             }
-
+            
             // Write the response.
             ctx.write(fullresponse);
+            ctx.flush();
         } else {
-            File file = new File("public" + request.getUri());
-
-            if (file.exists() && file.isFile()) {
-                // Cache Validation
-                String ifModifiedSince = request.headers().get(Names.IF_MODIFIED_SINCE);
-                if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
-                    SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-                    Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince);
-
-                    // Only compare up to the second because the datetime format we send to the client
-                    // does not have milliseconds
-                    long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
-                    long fileLastModifiedSeconds = file.lastModified() / 1000;
-                    if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-                        sendNotModified(ctx);
-                        return;
-                    }
-                }
-
-                RandomAccessFile raf;
-                try {
-                    raf = new RandomAccessFile(file, "r");
-                } catch (FileNotFoundException fnfe) {
-                    sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND);
-                    return;
-                }
-                long fileLength = raf.length();
-
-                HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-                HttpHeaders.setContentLength(response, fileLength);
-                setContentTypeHeader(response, file);
-                setDateAndCacheHeaders(response, file);
-                if (HttpHeaders.isKeepAlive(request)) {
-                    response.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-                }
-
-                // Write the initial line and the header.
-                ctx.write(response);
-
-                ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
-
-                // Write the end marker
-                ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
-
-                // Decide whether to close the connection or not.
-                if (!HttpHeaders.isKeepAlive(request)) {
-                    // Close the connection when the whole content is written out.
-                    lastContentFuture.addListener(ChannelFutureListener.CLOSE);
-                }
-            } else {
-                //Send back not found 404
-                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND);
-            }
+            //Forward the message to the file handler to server a static asset
+            ctx.fireChannelRead(msg);
         }
-        ctx.flush();
     }
 
     private boolean validateRequest(FullHttpRequest request) {
@@ -197,64 +132,5 @@ public class ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> 
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         //cause.printStackTrace(System.out); -- enable this only in dev environment!
         ctx.close();
-    }
-
-    /**
-     * When file timestamp is the same as what the browser is sending up, send a
-     * "304 Not Modified"
-     *
-     * @param ctx Context
-     */
-    private static void sendNotModified(ChannelHandlerContext ctx) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED);
-        setDateHeader(response);
-
-        // Close the connection as soon as the error message is sent.
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-    }
-
-    /**
-     * Sets the Date header for the HTTP response
-     *
-     * @param response HTTP response
-     */
-    private static void setDateHeader(FullHttpResponse response) {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
-
-        Calendar time = new GregorianCalendar();
-        response.headers().set(Names.DATE, dateFormatter.format(time.getTime()));
-    }
-
-    /**
-     * Sets the Date and Cache headers for the HTTP Response
-     *
-     * @param response HTTP response
-     * @param fileToCache file to extract content type
-     */
-    private static void setDateAndCacheHeaders(HttpResponse response, File fileToCache) {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
-
-        // Date header
-        Calendar time = new GregorianCalendar();
-        response.headers().set(Names.DATE, dateFormatter.format(time.getTime()));
-
-        // Add cache headers
-        time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
-        response.headers().set(Names.EXPIRES, dateFormatter.format(time.getTime()));
-        response.headers().set(Names.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
-        response.headers().set(Names.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
-    }
-
-    /**
-     * Sets the content type header for the HTTP Response
-     *
-     * @param response HTTP response
-     * @param file file to extract content type
-     */
-    private static void setContentTypeHeader(HttpResponse response, File file) {
-        MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
-        response.headers().set(Names.CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
     }
 }
