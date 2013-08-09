@@ -2,8 +2,8 @@ package torch.example.login.controller;
 
 import torch.controller.WebPage;
 import torch.http.request.RequestMethod;
-import torch.http.TorchHttpRequest;
-import torch.http.TorchHttpResponse;
+import torch.http.request.TorchHttpRequest;
+import torch.http.response.TorchHttpResponse;
 import torch.session.Session;
 import torch.template.Templateable;
 

@@ -1,4 +1,4 @@
-package torch.http;
+package torch.http.response;
 
 import io.netty.handler.codec.http.HttpHeaders.Names;
 import io.netty.handler.codec.http.HttpResponseStatus;

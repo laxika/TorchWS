@@ -1,7 +1,7 @@
 package torch.controller;
 
-import torch.http.TorchHttpRequest;
-import torch.http.TorchHttpResponse;
+import torch.http.request.TorchHttpRequest;
+import torch.http.response.TorchHttpResponse;
 import torch.session.Session;
 
 public abstract class WebPage {

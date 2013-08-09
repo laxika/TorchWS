@@ -1,5 +1,6 @@
-package torch.http.request;
+package torch.http.post;
 
+import torch.http.post.PostVariable;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;

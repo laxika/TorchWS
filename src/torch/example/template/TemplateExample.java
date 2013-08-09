@@ -1,8 +1,8 @@
 package torch.example.template;
 
 import torch.controller.WebPage;
-import torch.http.TorchHttpRequest;
-import torch.http.TorchHttpResponse;
+import torch.http.request.TorchHttpRequest;
+import torch.http.response.TorchHttpResponse;
 import torch.session.Session;
 import torch.template.Templateable;
 

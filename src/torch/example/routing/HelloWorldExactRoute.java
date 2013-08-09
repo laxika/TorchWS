@@ -1,8 +1,8 @@
 package torch.example.routing;
 
 import torch.controller.WebPage;
-import torch.http.TorchHttpRequest;
-import torch.http.TorchHttpResponse;
+import torch.http.request.TorchHttpRequest;
+import torch.http.response.TorchHttpResponse;
 import torch.session.Session;
 
 public class HelloWorldExactRoute extends WebPage {

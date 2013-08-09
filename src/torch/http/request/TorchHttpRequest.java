@@ -1,10 +1,10 @@
-package torch.http;
+package torch.http.request;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.*;
 import io.netty.handler.codec.http.HttpRequest;
 import torch.cookie.ReadOnlyCookieDataStorage;
-import torch.http.request.ReadOnlyPostDataStorage;
-import torch.http.request.ReadOnlyRouteDataStorage;
+import torch.http.post.ReadOnlyPostDataStorage;
+import torch.route.container.ReadOnlyRouteDataStorage;
 import torch.http.request.RequestMethod;
 import torch.route.Route;
 
