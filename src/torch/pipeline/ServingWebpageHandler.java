@@ -1,4 +1,4 @@
-package torch;
+package torch.pipeline;
 
 import freemarker.template.Template;
 import io.netty.buffer.Unpooled;
@@ -15,8 +15,8 @@ import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
 import java.io.StringWriter;
 import java.util.Map;
+import torch.controller.WebPage;
 import torch.cookie.CookieVariable;
-import torch.handler.WebPage;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
 import torch.http.request.RequestMethod;
@@ -28,27 +28,17 @@ import torch.template.TemplateManager;
 import torch.template.Templateable;
 import torch.util.ChannelVariable;
 
-public class ServerHandler extends ChannelInboundHandlerAdapter /*SimpleChannelInboundHandler<FullHttpRequest>*/ {
+public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
     protected static SessionManager sessionManager = new SessionManager();
     protected static TemplateManager templateManager = new TemplateManager();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        //Check thet it's a http request
-        if (!(msg instanceof FullHttpRequest)) {
-            return;
-        }
-
         FullHttpRequest request = (FullHttpRequest) msg;
 
-        if (validateRequest(request)) {
-            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
-            return;
-        }
-        
         Route target = calculateRouteFromRequest(ctx, request);
-        
+
         //Check that we the target of the route
         if (target != null) {
             TorchHttpResponse response = new TorchHttpResponse();
@@ -100,7 +90,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter /*SimpleChannelI
 
                 fullresponse.headers().add(obj.getKey(), obj.getValue());
             }
-            
+
             // Write the response.
             ctx.write(fullresponse);
             ctx.flush();

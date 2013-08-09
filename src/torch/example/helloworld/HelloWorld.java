@@ -1,6 +1,6 @@
 package torch.example.helloworld;
 
-import torch.handler.WebPage;
+import torch.controller.WebPage;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
 import torch.session.Session;

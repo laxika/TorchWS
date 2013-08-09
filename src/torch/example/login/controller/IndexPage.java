@@ -1,7 +1,7 @@
 package torch.example.login.controller;
 
 import torch.example.login.data.IndexData;
-import torch.handler.WebPage;
+import torch.controller.WebPage;
 import torch.http.TorchHttpRequest;
 import torch.http.TorchHttpResponse;
 import torch.session.Session;

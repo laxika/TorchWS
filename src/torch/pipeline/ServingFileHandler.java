@@ -1,4 +1,4 @@
-package torch;
+package torch.pipeline;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -28,7 +28,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import javax.activation.MimetypesFileTypeMap;
 
-public class ServerFileHandler extends ChannelInboundHandlerAdapter {
+public class ServingFileHandler extends ChannelInboundHandlerAdapter {
 
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
@@ -36,17 +36,7 @@ public class ServerFileHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        //Check thet it's a http request
-        if (!(msg instanceof FullHttpRequest)) {
-            return;
-        }
-
         FullHttpRequest request = (FullHttpRequest) msg;
-
-        if (validateRequest(request)) {
-            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST,request);
-            return;
-        }
 
         File file = new File("public" + request.getUri());
 
@@ -71,7 +61,7 @@ public class ServerFileHandler extends ChannelInboundHandlerAdapter {
             try {
                 raf = new RandomAccessFile(file, "r");
             } catch (FileNotFoundException fnfe) {
-                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND,request);
+                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, request);
                 return;
             }
             long fileLength = raf.length();
@@ -80,7 +70,7 @@ public class ServerFileHandler extends ChannelInboundHandlerAdapter {
             HttpHeaders.setContentLength(response, fileLength);
             setContentTypeHeader(response, file);
             setDateAndCacheHeaders(response, file);
-            
+
             if (HttpHeaders.isKeepAlive(request)) {
                 response.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
             }
@@ -113,15 +103,15 @@ public class ServerFileHandler extends ChannelInboundHandlerAdapter {
     private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status, FullHttpRequest request) {
         FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("404 Not found!", CharsetUtil.UTF_8));
 
-        
-            if (HttpHeaders.isKeepAlive(request)) {
-                // Add 'Content-Length' header only for a keep-alive connection.
-                fullresponse.headers().set(Names.CONTENT_LENGTH, fullresponse.content().readableBytes());
-                // Add keep alive header as per:
-                // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
-                fullresponse.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-            }
-        
+
+        if (HttpHeaders.isKeepAlive(request)) {
+            // Add 'Content-Length' header only for a keep-alive connection.
+            fullresponse.headers().set(Names.CONTENT_LENGTH, fullresponse.content().readableBytes());
+            // Add keep alive header as per:
+            // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
+            fullresponse.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+        }
+
         fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/html; charset=UTF-8");
 
         ctx.write(fullresponse);

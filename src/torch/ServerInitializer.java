@@ -7,6 +7,9 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import torch.pipeline.HttpRequestValidator;
+import torch.pipeline.ServingFileHandler;
+import torch.pipeline.ServingWebpageHandler;
 
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     
@@ -18,7 +21,8 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast("aggregator", new HttpObjectAggregator(1048576));
         pipeline.addLast("encoder", new HttpResponseEncoder()); 
         pipeline.addLast("streamer", new ChunkedWriteHandler());
-        pipeline.addLast("handler", new ServerHandler());
-        pipeline.addLast("filehandler", new ServerFileHandler());
+        pipeline.addLast("validator", new HttpRequestValidator());
+        pipeline.addLast("webpage", new ServingWebpageHandler());
+        pipeline.addLast("file", new ServingFileHandler());
     }
 }
