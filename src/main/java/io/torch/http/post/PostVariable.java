@@ -1,4 +1,4 @@
-package torch.http.post;
+package io.torch.http.post;
 
 public class PostVariable {
 
