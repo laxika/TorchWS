@@ -7,9 +7,9 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import torch.pipeline.HttpRequestValidator;
-import torch.pipeline.ServingFileHandler;
-import torch.pipeline.ServingWebpageHandler;
+import io.torch.pipeline.HttpRequestValidator;
+import io.torch.pipeline.ServingFileHandler;
+import io.torch.pipeline.ServingWebpageHandler;
 
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     

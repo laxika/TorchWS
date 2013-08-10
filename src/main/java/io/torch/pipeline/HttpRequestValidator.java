@@ -1,4 +1,4 @@
-package torch.pipeline;
+package io.torch.pipeline;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;

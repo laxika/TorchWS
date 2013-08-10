@@ -1,4 +1,4 @@
-package torch.pipeline;
+package io.torch.pipeline;
 
 import freemarker.template.Template;
 import io.netty.buffer.Unpooled;
