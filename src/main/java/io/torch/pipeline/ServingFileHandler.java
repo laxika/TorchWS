@@ -19,7 +19,10 @@ import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.util.CharsetUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -171,8 +174,7 @@ public class ServingFileHandler extends ChannelInboundHandlerAdapter {
      * @param response HTTP response
      * @param file file to extract content type
      */
-    private static void setContentTypeHeader(HttpResponse response, File file) {
-        MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
+    private static void setContentTypeHeader(HttpResponse response, File file) throws IOException {
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, Files.probeContentType(Paths.get(file.getPath())));
     }
 }
