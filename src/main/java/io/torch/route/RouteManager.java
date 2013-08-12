@@ -13,7 +13,7 @@ public class RouteManager {
     private final DynamicRouteContainer dynamicRouteContainer = new DynamicRouteContainer();
 
     public void defineRoute(String route, Class target) {
-        defineRoute(route, target, RequestMethod.GET, null);
+        defineRoute(route, target, null, RequestMethod.GET);
     }
 
     /**
@@ -22,8 +22,8 @@ public class RouteManager {
      * @param route the uri of the route
      * @param target the target of the route
      */
-    public void defineRoute(String route, Class target, RequestMethod method) {
-        defineRoute(route, target, RequestMethod.GET, null);
+    public void defineRoute(String route, Class target, Object[] depedency) {
+        defineRoute(route, target, depedency, RequestMethod.GET);
     }
 
     /**
@@ -32,7 +32,7 @@ public class RouteManager {
      * @param route the uri of the route
      * @param target the target of the route
      */
-    public void defineRoute(String route, Class target, RequestMethod method, Object[] depedency) {
+    public void defineRoute(String route, Class target, Object[] depedency, RequestMethod method) {
         String[] routeHops = route.split("/");
 
         if (routeHops.length == 0) {
