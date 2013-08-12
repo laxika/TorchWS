@@ -1,23 +1,23 @@
 package io.torch.route;
 
+import io.torch.http.request.RequestMethod;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
-import io.torch.http.request.RequestMethod;
 
 public class Route {
 
     private final String routingUri;
     private final int hopCount;
-    private final Class target;
+    private final RouteTarget target;
     private final String[] routingHops;
     private final int dynamicVariableCount;
     private final ArrayList<Integer> dynamicVariablePositions = new ArrayList<>();
     private final RequestMethod method;
 
-    public Route(String routingUri, RequestMethod method, Class target) {
+    public Route(String routingUri, RequestMethod method, Class target, Object[] depedency) {
         this.routingUri = routingUri;
-        this.target = target;
+        this.target = new RouteTarget(target,null);
         this.routingHops = routingUri.split("/");
         this.hopCount = routingHops.length;
         this.method = method;
@@ -36,7 +36,7 @@ public class Route {
         return hopCount;
     }
 
-    public Class getTarget() {
+    public RouteTarget getTarget() {
         return target;
     }
 

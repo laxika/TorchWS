@@ -20,6 +20,7 @@ import io.torch.http.request.TorchHttpRequest;
 import io.torch.http.response.TorchHttpResponse;
 import io.torch.route.Route;
 import io.torch.route.RouteManager;
+import io.torch.route.RouteTarget;
 import io.torch.session.Session;
 import io.torch.session.SessionManager;
 import io.torch.template.TemplateManager;
@@ -37,12 +38,12 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         FullHttpRequest request = (FullHttpRequest) msg;
 
-        Route target = calculateRouteFromRequest(ctx, request);
+        Route route = calculateRouteFromRequest(ctx, request);
 
         //Check that we the target of the route
-        if (target != null) {
+        if (route != null) {
             TorchHttpResponse response = new TorchHttpResponse();
-            TorchHttpRequest torchreq = new TorchHttpRequest(request, target);
+            TorchHttpRequest torchreq = new TorchHttpRequest(request, route);
 
             Session session = sessionManager.getSession(torchreq.getCookieData().getCookie("SESSID").getValue());
 
@@ -53,7 +54,15 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
             }
 
             //Instantiate a new WebPage object and handle the request
-            WebPage webpage = (WebPage) target.getTarget().getConstructor().newInstance();
+            WebPage webpage;
+            RouteTarget target = route.getTarget();
+
+            if (target.getDepedencyObjectList() == null) {
+                webpage = (WebPage) target.getTargetClass().getConstructor().newInstance();
+            } else {
+                webpage = (WebPage) target.getTargetClass().getDeclaredConstructor(target.getDepedencyClassList()).newInstance(target.getDepedencyObjectList());
+            }
+
             webpage.handle(torchreq, response, session);
 
             FullHttpResponse fullresponse;

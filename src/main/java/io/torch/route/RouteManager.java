@@ -1,11 +1,11 @@
 package io.torch.route;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import io.torch.http.request.RequestMethod;
 import io.torch.route.container.DynamicRouteContainer;
 import io.torch.route.container.StaticRouteContainer;
 import io.torch.util.ArrayUtils;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class RouteManager {
 
@@ -13,7 +13,7 @@ public class RouteManager {
     private final DynamicRouteContainer dynamicRouteContainer = new DynamicRouteContainer();
 
     public void defineRoute(String route, Class target) {
-        defineRoute(route, target, RequestMethod.GET);
+        defineRoute(route, target, RequestMethod.GET, null);
     }
 
     /**
@@ -23,13 +23,23 @@ public class RouteManager {
      * @param target the target of the route
      */
     public void defineRoute(String route, Class target, RequestMethod method) {
+        defineRoute(route, target, RequestMethod.GET, null);
+    }
+
+    /**
+     * Add a new route to the defined routes.
+     *
+     * @param route the uri of the route
+     * @param target the target of the route
+     */
+    public void defineRoute(String route, Class target, RequestMethod method, Object[] depedency) {
         String[] routeHops = route.split("/");
 
         if (routeHops.length == 0) {
-            addNewRoutePart("", 0, new Route(route, method, target));
+            addNewRoutePart("", 0, new Route(route, method, target,depedency));
         } else {
             for (int level = 1; level < routeHops.length; level++) {
-                addNewRoutePart(routeHops[level], level, new Route(route, method, target));
+                addNewRoutePart(routeHops[level], level, new Route(route, method, target,depedency));
             }
         }
     }

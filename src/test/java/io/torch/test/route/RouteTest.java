@@ -1,16 +1,15 @@
 package io.torch.test.route;
 
-import io.torch.route.RouteVariable;
 import io.torch.route.Route;
+import io.torch.route.RouteVariable;
 import java.util.HashMap;
 import org.testng.annotations.Test;
-import io.torch.http.request.RequestMethod;
 
 public class RouteTest {
 
     @Test
     public void testRouteVariableValuesTest() {
-        Route route = new Route("/url/@var1/@var2", RequestMethod.GET, null);
+        Route route = new Route("/url/@var1/@var2", null, null, null);
 
         HashMap<String, RouteVariable> map = route.calculateVariablesValuesFromUrl("/url/something/test");
 
