@@ -1,5 +1,6 @@
 package io.torch.test.route;
 
+import io.torch.exception.NoSuchConstructorException;
 import io.torch.route.Route;
 import io.torch.route.RouteVariable;
 import java.util.HashMap;
@@ -8,8 +9,8 @@ import org.testng.annotations.Test;
 public class RouteTest {
 
     @Test
-    public void testRouteVariableValuesTest() {
-        Route route = new Route("/url/@var1/@var2", null, null, null);
+    public void testRouteVariableValuesTest() throws NoSuchConstructorException {
+        Route route = new Route("/url/@var1/@var2", null, Object.class, Route.NO_DEPEDENCY);
 
         HashMap<String, RouteVariable> map = route.calculateVariablesValuesFromUrl("/url/something/test");
 

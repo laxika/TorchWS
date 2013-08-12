@@ -1,5 +1,6 @@
 package io.torch.route;
 
+import io.torch.exception.NoSuchConstructorException;
 import io.torch.http.request.RequestMethod;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.Objects;
 
 public class Route {
 
+    public static final Object[] NO_DEPEDENCY = new Object[]{};
     private final String routingUri;
     private final int hopCount;
     private final RouteTarget target;
@@ -15,7 +17,7 @@ public class Route {
     private final ArrayList<Integer> dynamicVariablePositions = new ArrayList<>();
     private final RequestMethod method;
 
-    public Route(String routingUri, RequestMethod method, Class target, Object[] depedency) {
+    public Route(String routingUri, RequestMethod method, Class target, Object[] depedency) throws NoSuchConstructorException {
         this.routingUri = routingUri;
         this.target = new RouteTarget(target, depedency);
         this.routingHops = routingUri.split("/");

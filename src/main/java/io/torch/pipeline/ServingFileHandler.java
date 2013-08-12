@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
-import javax.activation.MimetypesFileTypeMap;
 
 public class ServingFileHandler extends ChannelInboundHandlerAdapter {
 

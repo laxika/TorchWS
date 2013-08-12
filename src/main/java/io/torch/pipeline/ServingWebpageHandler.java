@@ -53,15 +53,10 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
                 response.getCookieData().addCookie(new CookieVariable("SESSID", session.getSessionId()));
             }
 
-            //Instantiate a new WebPage object and handle the request
-            WebPage webpage;
             RouteTarget target = route.getTarget();
 
-            if (target.getDepedencyObjectList() == null) {
-                webpage = (WebPage) target.getTargetClass().getConstructor().newInstance();
-            } else {
-                webpage = (WebPage) target.getTargetClass().getDeclaredConstructor(target.getDepedencyClassList()).newInstance(target.getDepedencyObjectList());
-            }
+            //Instantiate a new WebPage object and handle the request
+            WebPage webpage = (WebPage) target.getTargetClass().getDeclaredConstructor(target.getDepedencyClassList()).newInstance(target.getDepedencyObjectList());
 
             webpage.handle(torchreq, response, session);
 
