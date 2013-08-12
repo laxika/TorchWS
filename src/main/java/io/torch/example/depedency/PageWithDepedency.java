@@ -13,13 +13,6 @@ public class PageWithDepedency extends WebPage {
     public PageWithDepedency(String str1, String str2) {
         this.str1 = str1;
         this.str2 = str2;
-        System.out.println("Dep");
-    }
-
-    public PageWithDepedency(Object str1, Object str2) {
-        this.str1 = "";
-        this.str2 = "";
-        System.out.println("Dep2");
     }
 
     @Override

@@ -9,7 +9,7 @@ public class Main {
         Server torch = new Server();
 
         //Adding the helloworld page to the route mapper
-        torch.getRouteManager().defineRoute("/", PageWithDepedency.class, new Object[]{new String("This is a string depedency"), new String("And another one")});
+        torch.getRouteManager().defineRoute("/", PageWithDepedency.class, new Object[]{"This is a string depedency", "And another one"});
 
         //Run the server
         torch.run();
