@@ -14,7 +14,8 @@ public class RouteTarget {
             depedencyClassList = new Class[depedencyObjectList.length];
             
             for(int i = 0; i < depedencyObjectList.length; i++) {
-                depedencyClassList[i] = depedencyObjectList.getClass();
+                depedencyClassList[i] = depedencyObjectList.getClass().getComponentType();
+                System.out.println(depedencyClassList[i]);
             }
         } else {
             depedencyClassList = null;

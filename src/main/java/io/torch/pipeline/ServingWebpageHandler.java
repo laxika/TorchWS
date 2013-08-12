@@ -109,10 +109,6 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private boolean validateRequest(FullHttpRequest request) {
-        return !request.getDecoderResult().isSuccess();
-    }
-
     private Route calculateRouteFromRequest(ChannelHandlerContext ctx, FullHttpRequest request) {
         RouteManager routeManager = (RouteManager) ctx.channel().attr(ChannelVariable.ROUTE_MANAGER.getVariableKey()).get();
 

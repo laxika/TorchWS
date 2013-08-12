@@ -17,7 +17,7 @@ public class Route {
 
     public Route(String routingUri, RequestMethod method, Class target, Object[] depedency) {
         this.routingUri = routingUri;
-        this.target = new RouteTarget(target,null);
+        this.target = new RouteTarget(target, depedency);
         this.routingHops = routingUri.split("/");
         this.hopCount = routingHops.length;
         this.method = method;
