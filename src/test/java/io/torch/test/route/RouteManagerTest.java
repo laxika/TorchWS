@@ -6,6 +6,8 @@ import io.torch.example.routing.HelloWorldWithTwoVar;
 import io.torch.http.request.RequestMethod;
 import io.torch.route.RouteManager;
 import io.torch.route.RouteTarget;
+import io.torch.test.page.TestRouteWithDependency;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -56,5 +58,24 @@ public class RouteManagerTest {
         testTarget.defineRoute("/", HelloWorldWithTwoVar.class);
 
         assert testTarget.calculateRouteByUrl("/", RequestMethod.GET).getTarget().newInstance() instanceof HelloWorldWithTwoVar : "Priority test 1";
+    }
+
+    @Test
+    public void testRouteDependency() throws Exception {
+        try {
+            testTarget.defineRoute("/", TestRouteWithDependency.class);
+            Assert.fail("NoSuchConstructorException expected");
+        } catch (Exception expected) {
+        }
+        try {
+            testTarget.defineRoute("/", TestRouteWithDependency.class, null);
+            Assert.fail("IllegalStateException expected");
+        } catch (Exception expected) {
+        }
+        
+        testTarget.defineRoute("/", TestRouteWithDependency.class, new Object[] {"Dependency One", "Dependency Two"});
+        
+        assert ((TestRouteWithDependency)testTarget.calculateRouteByUrl("/", RequestMethod.GET).getTarget().newInstance()).getDependencyOne().equals("Dependency One") : "Dependency test 1";
+        assert ((TestRouteWithDependency)testTarget.calculateRouteByUrl("/", RequestMethod.GET).getTarget().newInstance()).getDependencyTwo().equals("Dependency Two") : "Dependency test 2";
     }
 }
