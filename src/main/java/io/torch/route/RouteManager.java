@@ -1,5 +1,6 @@
 package io.torch.route;
 
+import io.torch.controller.WebPage;
 import io.torch.exception.NoSuchConstructorException;
 import io.torch.http.request.RequestMethod;
 import io.torch.route.container.DynamicRouteContainer;
@@ -13,7 +14,7 @@ public class RouteManager {
     private final StaticRouteContainer staticRouteContainer = new StaticRouteContainer();
     private final DynamicRouteContainer dynamicRouteContainer = new DynamicRouteContainer();
 
-    public void defineRoute(String route, Class target) throws NoSuchConstructorException {
+    public void defineRoute(String route, Class<? extends WebPage> target) throws NoSuchConstructorException {
         defineRoute(route, target, RouteTarget.NO_DEPEDENCY, RequestMethod.GET);
     }
 
@@ -23,7 +24,7 @@ public class RouteManager {
      * @param route the uri of the route
      * @param target the target of the route
      */
-    public void defineRoute(String route, Class target, Object[] depedency) throws NoSuchConstructorException {
+    public void defineRoute(String route, Class<? extends WebPage> target, Object[] depedency) throws NoSuchConstructorException {
         defineRoute(route, target, depedency, RequestMethod.GET);
     }
 
@@ -33,7 +34,7 @@ public class RouteManager {
      * @param route the uri of the route
      * @param target the target of the route
      */
-    public void defineRoute(String route, Class target, Object[] depedency, RequestMethod method) throws NoSuchConstructorException {
+    public void defineRoute(String route, Class<? extends WebPage> target, Object[] depedency, RequestMethod method) throws NoSuchConstructorException {
         String[] routeHops = route.split("/");
 
         if (routeHops.length == 0) {

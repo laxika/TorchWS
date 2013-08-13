@@ -17,8 +17,8 @@ public class Route {
     private final ArrayList<Integer> dynamicVariablePositions = new ArrayList<>();
     private final RequestMethod method;
 
-    public Route(String routingUri, Class target, Object[] depedency, RequestMethod method) throws NoSuchConstructorException {
-        if (!WebPage.class.isAssignableFrom(target) || depedency == null || method == null) {
+    public Route(String routingUri, Class<? extends WebPage> target, Object[] depedency, RequestMethod method) throws NoSuchConstructorException {
+        if (target == null || depedency == null || method == null) {
             throw new IllegalArgumentException();
         }
         

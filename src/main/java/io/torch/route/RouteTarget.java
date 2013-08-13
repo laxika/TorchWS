@@ -11,8 +11,8 @@ public class RouteTarget {
     private final Object[] depedencyObjectList;
     private final Constructor constructor;
 
-    public RouteTarget(Class target, Object[] depedency) throws NoSuchConstructorException {
-        if (!WebPage.class.isAssignableFrom(target) || target == null || depedency == null) {
+    public RouteTarget(Class<? extends WebPage> target, Object[] depedency) throws NoSuchConstructorException {
+        if (target == null || depedency == null) {
             throw new IllegalArgumentException();
         }
         
