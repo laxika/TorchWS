@@ -93,13 +93,13 @@ for (RouteVariable routeVar : request.getRouteData()) {
 You can pass down depedencies to WebPage classes via routing.
 
 ``` Java
-torch.getRouteManager().defineRoute("/", PageWithDepedency.class, new Object[]{"This is a string depedency", "And another one"});
+torch.getRouteManager().defineRoute("/", PageWithDependency.class, new Object[]{"This is a string dependency", "And another one"});
 ```
 
 Then get the passed down depedencies in the constructor of the target WebPage.
 
 ``` Java
-public PageWithDepedency(String str1, String str2) {
+public PageWithDependency(String str1, String str2) {
     this.str1 = str1;
     this.str2 = str2;
 }
@@ -107,14 +107,14 @@ public PageWithDepedency(String str1, String str2) {
 
 You need to create the correct constructor, otherwise you will get `NoSuchConstructorException` exception.
 
-Passing down null as depedency is not allowed, use an empty `Object` array or the `RouteTarget.NO_DEPEDENCY` constant instead.
+Passing down null as dependency is not allowed, use an empty `Object` array or the `RouteTarget.NO_DEPENDENCY` constant instead.
 
 ### Routing by request method
 
 You can also route GET/POST/PUT/DELETE request to different classes (the defines without `RequestMethod` will handle the GET requests):
 
 ``` Java
-torch.getRouteManager().defineRoute("/hello/exact/route", HelloWorldExactRoute.class, RouteTarget.NO_DEPEDENCY, RequestMethod.POST);
+torch.getRouteManager().defineRoute("/hello/exact/route", HelloWorldExactRoute.class, RouteTarget.NO_DEPENDENCY, RequestMethod.POST);
 ```
 
 The routing engine will route all POST requests for the `/hello/exact/route` uri to the `HelloWorldExactRoute` class, while the GET requests for the same uri will return a 404 Not Found error.
