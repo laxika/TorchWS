@@ -1,9 +1,9 @@
 package io.torch.example.login.controller;
 
 import io.torch.controller.WebPage;
+import io.torch.http.request.RequestMethod;
 import io.torch.http.request.TorchHttpRequest;
 import io.torch.http.response.TorchHttpResponse;
-import io.torch.http.request.RequestMethod;
 import io.torch.session.Session;
 import io.torch.template.Templateable;
 

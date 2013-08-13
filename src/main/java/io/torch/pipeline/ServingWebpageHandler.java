@@ -42,11 +42,14 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
         if (route != null) {
             TorchHttpResponse response = new TorchHttpResponse();
             TorchHttpRequest torchreq = new TorchHttpRequest(request, route);
-
-            Session session = sessionManager.getSession(torchreq.getCookieData().getCookie("SESSID").getValue());
-
-            //New session
-            if (session == null) {
+            
+            //Calculating the actual session, if no session data recived, start a new one
+            CookieVariable sessionCookie = torchreq.getCookieData().getCookie("SESSID");
+            
+            Session session;
+            if(sessionCookie != null && sessionManager.getSession(sessionCookie.getValue()) != null) {
+                session = sessionManager.getSession(sessionCookie.getValue());
+            } else {
                 session = sessionManager.startNewSession();
                 response.getCookieData().addCookie(new CookieVariable("SESSID", session.getSessionId()));
             }
@@ -56,6 +59,7 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
             webpage.handle(torchreq, response, session);
 
+            //Generate the template
             FullHttpResponse fullresponse;
             if (webpage instanceof Templateable) {
                 Template temp = templateManager.getTemplate(((Templateable) webpage).getTemplate());
@@ -108,7 +112,6 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        //cause.printStackTrace(System.out); -- enable this only in dev environment!
         ctx.close();
     }
 }
