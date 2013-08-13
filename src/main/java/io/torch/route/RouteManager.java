@@ -37,10 +37,10 @@ public class RouteManager {
         String[] routeHops = route.split("/");
 
         if (routeHops.length == 0) {
-            addNewRoutePart("", 0, new Route(route, method, target, depedency));
+            addNewRoutePart("", 0, new Route(route, target, depedency, method));
         } else {
             for (int level = 1; level < routeHops.length; level++) {
-                addNewRoutePart(routeHops[level], level, new Route(route, method, target, depedency));
+                addNewRoutePart(routeHops[level], level, new Route(route, target, depedency, method));
             }
         }
     }

@@ -17,7 +17,7 @@ public class Route {
     private final ArrayList<Integer> dynamicVariablePositions = new ArrayList<>();
     private final RequestMethod method;
 
-    public Route(String routingUri, RequestMethod method, Class target, Object[] depedency) throws NoSuchConstructorException {
+    public Route(String routingUri, Class target, Object[] depedency, RequestMethod method) throws NoSuchConstructorException {
         this.routingUri = routingUri;
         this.target = new RouteTarget(target, depedency);
         this.routingHops = routingUri.split("/");

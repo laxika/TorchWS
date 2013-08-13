@@ -10,7 +10,7 @@ public class RouteTest {
 
     @Test
     public void testRouteVariableValuesTest() throws NoSuchConstructorException {
-        Route route = new Route("/url/@var1/@var2", null, Object.class, Route.NO_DEPEDENCY);
+        Route route = new Route("/url/@var1/@var2", Object.class, Route.NO_DEPEDENCY, null);
 
         HashMap<String, RouteVariable> map = route.calculateVariablesValuesFromUrl("/url/something/test");
 
