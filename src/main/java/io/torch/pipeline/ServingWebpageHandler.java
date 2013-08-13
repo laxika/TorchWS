@@ -20,7 +20,6 @@ import io.torch.http.request.TorchHttpRequest;
 import io.torch.http.response.TorchHttpResponse;
 import io.torch.route.Route;
 import io.torch.route.RouteManager;
-import io.torch.route.RouteTarget;
 import io.torch.session.Session;
 import io.torch.session.SessionManager;
 import io.torch.template.TemplateManager;
@@ -53,10 +52,8 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
                 response.getCookieData().addCookie(new CookieVariable("SESSID", session.getSessionId()));
             }
 
-            RouteTarget target = route.getTarget();
-
             //Instantiate a new WebPage object and handle the request
-            WebPage webpage = (WebPage) target.getTargetClass().getDeclaredConstructor(target.getDepedencyClassList()).newInstance(target.getDepedencyObjectList());
+            WebPage webpage = route.getTarget().newInstance();
 
             webpage.handle(torchreq, response, session);
 

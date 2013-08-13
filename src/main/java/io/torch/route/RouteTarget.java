@@ -1,43 +1,38 @@
 package io.torch.route;
 
+import io.torch.controller.WebPage;
 import io.torch.exception.NoSuchConstructorException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 public class RouteTarget {
 
-    private final Class target;
     private final Object[] depedencyObjectList;
-    private final Class[] depedencyClassList;
+    private final Constructor constructor;
 
     public RouteTarget(Class target, Object[] depedency) throws NoSuchConstructorException {
-        if (target == null || depedency == null) {
+        if (!WebPage.class.isAssignableFrom(target) || target == null || depedency == null) {
             throw new IllegalArgumentException();
         }
         
-        this.target = target;
         this.depedencyObjectList = depedency;
-        this.depedencyClassList = new Class[depedencyObjectList.length];
+        
+        //Calculate the classes of the depedencies
+        Class[] depedencyClassList = new Class[depedencyObjectList.length];
 
-        //Calculate the classes
         for (int i = 0; i < depedencyObjectList.length; i++) {
             depedencyClassList[i] = depedencyObjectList[i].getClass();
         }
 
+        //Try to get the constructor if it's not exist we shut down the server
         try {
-            target.getConstructor(depedencyClassList);
+            this.constructor = target.getConstructor(depedencyClassList);
         } catch (NoSuchMethodException e) {
             throw new NoSuchConstructorException("No such constructor in " + e.getMessage());
         }
     }
-
-    public Class getTargetClass() {
-        return target;
-    }
-
-    public Object[] getDepedencyObjectList() {
-        return depedencyObjectList;
-    }
-
-    public Class[] getDepedencyClassList() {
-        return depedencyClassList;
+    
+    public WebPage newInstance() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        return (WebPage) constructor.newInstance(depedencyObjectList);
     }
 }
