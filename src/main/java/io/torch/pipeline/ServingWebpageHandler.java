@@ -9,7 +9,6 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders.Names;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
@@ -105,14 +104,6 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
         RouteManager routeManager = (RouteManager) ctx.channel().attr(ChannelVariable.ROUTE_MANAGER.getVariableKey()).get();
 
         return routeManager.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
-    }
-
-    private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status) {
-        FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("404 Not found!", CharsetUtil.UTF_8));
-
-        fullresponse.headers().set(Names.CONTENT_TYPE, "text/html; charset=UTF-8");
-
-        ctx.write(fullresponse);
     }
 
     @Override

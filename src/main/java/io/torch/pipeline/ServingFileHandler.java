@@ -98,10 +98,6 @@ public class ServingFileHandler extends ChannelInboundHandlerAdapter {
         ctx.flush();
     }
 
-    private boolean validateRequest(FullHttpRequest request) {
-        return !request.getDecoderResult().isSuccess();
-    }
-
     private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status, FullHttpRequest request) {
         FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("404 Not found!", CharsetUtil.UTF_8));
 
@@ -117,6 +113,7 @@ public class ServingFileHandler extends ChannelInboundHandlerAdapter {
         fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/html; charset=UTF-8");
 
         ctx.write(fullresponse);
+        ctx.flush();
     }
 
     /**
