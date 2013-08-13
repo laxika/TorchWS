@@ -14,7 +14,7 @@ public class RouteManager {
     private final DynamicRouteContainer dynamicRouteContainer = new DynamicRouteContainer();
 
     public void defineRoute(String route, Class target) throws NoSuchConstructorException {
-        defineRoute(route, target, Route.NO_DEPEDENCY, RequestMethod.GET);
+        defineRoute(route, target, RouteTarget.NO_DEPEDENCY, RequestMethod.GET);
     }
 
     /**

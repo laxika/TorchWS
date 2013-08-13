@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public class RouteTarget {
 
+    public static final Object[] NO_DEPEDENCY = new Object[]{};
     private final Object[] depedencyObjectList;
     private final Constructor constructor;
 

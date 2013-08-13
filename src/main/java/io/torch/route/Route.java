@@ -9,7 +9,6 @@ import java.util.Objects;
 
 public class Route {
 
-    public static final Object[] NO_DEPEDENCY = new Object[]{};
     private final String routingUri;
     private final int hopCount;
     private final RouteTarget target;
