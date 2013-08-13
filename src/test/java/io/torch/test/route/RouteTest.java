@@ -1,5 +1,6 @@
 package io.torch.test.route;
 
+import io.torch.example.routing.HelloWorldExactRoute;
 import io.torch.exception.NoSuchConstructorException;
 import io.torch.route.Route;
 import io.torch.route.RouteVariable;
@@ -10,7 +11,7 @@ public class RouteTest {
 
     @Test
     public void testRouteVariableValuesTest() throws NoSuchConstructorException {
-        Route route = new Route("/url/@var1/@var2", Object.class, Route.NO_DEPEDENCY, null);
+        Route route = new Route("/url/@var1/@var2", HelloWorldExactRoute.class);
 
         HashMap<String, RouteVariable> map = route.calculateVariablesValuesFromUrl("/url/something/test");
 
