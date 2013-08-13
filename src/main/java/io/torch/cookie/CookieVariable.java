@@ -1,5 +1,8 @@
 package io.torch.cookie;
 
+/**
+ * Hold the data of a html cookie.
+ */
 public class CookieVariable {
 
     private final String name;

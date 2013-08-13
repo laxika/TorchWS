@@ -19,7 +19,7 @@ public class Server {
     /**
      * Start the server. Call this method after setting up every configuration/routes correctly.
      *
-     * @throws Exception
+     * @throws InterruptedException
      */
     public void run() throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -41,6 +41,11 @@ public class Server {
         }
     }
 
+    /**
+     * Return the RouteManager. You can define routes.
+     * 
+     * @return the route manage
+     */
     public RouteManager getRouteManager() {
         return container;
     }
