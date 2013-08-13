@@ -1,5 +1,6 @@
 package io.torch.route;
 
+import io.torch.controller.WebPage;
 import io.torch.exception.NoSuchConstructorException;
 import io.torch.http.request.RequestMethod;
 import java.util.ArrayList;
@@ -18,6 +19,10 @@ public class Route {
     private final RequestMethod method;
 
     public Route(String routingUri, Class target, Object[] depedency, RequestMethod method) throws NoSuchConstructorException {
+        if (!WebPage.class.isAssignableFrom(target) || depedency == null || method == null) {
+            throw new IllegalArgumentException();
+        }
+        
         this.routingUri = routingUri;
         this.target = new RouteTarget(target, depedency);
         this.routingHops = routingUri.split("/");
