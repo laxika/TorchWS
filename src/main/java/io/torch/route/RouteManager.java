@@ -15,7 +15,7 @@ public class RouteManager {
     private final DynamicRouteContainer dynamicRouteContainer = new DynamicRouteContainer();
 
     public void defineRoute(String route, Class<? extends WebPage> target) throws NoSuchConstructorException {
-        defineRoute(route, target, RouteTarget.NO_DEPEDENCY, RequestMethod.GET);
+        defineRoute(route, target, RouteTarget.NO_DEPENDENCY, RequestMethod.GET);
     }
 
     /**
@@ -24,8 +24,8 @@ public class RouteManager {
      * @param route the uri of the route
      * @param target the target of the route
      */
-    public void defineRoute(String route, Class<? extends WebPage> target, Object[] depedency) throws NoSuchConstructorException {
-        defineRoute(route, target, depedency, RequestMethod.GET);
+    public void defineRoute(String route, Class<? extends WebPage> target, Object[] dependency) throws NoSuchConstructorException {
+        defineRoute(route, target, dependency, RequestMethod.GET);
     }
 
     /**
@@ -34,14 +34,14 @@ public class RouteManager {
      * @param route the uri of the route
      * @param target the target of the route
      */
-    public void defineRoute(String route, Class<? extends WebPage> target, Object[] depedency, RequestMethod method) throws NoSuchConstructorException {
+    public void defineRoute(String route, Class<? extends WebPage> target, Object[] dependency, RequestMethod method) throws NoSuchConstructorException {
         String[] routeHops = route.split("/");
 
         if (routeHops.length == 0) {
-            addNewRoutePart("", 0, new Route(route, target, depedency, method));
+            addNewRoutePart("", 0, new Route(route, target, dependency, method));
         } else {
             for (int level = 1; level < routeHops.length; level++) {
-                addNewRoutePart(routeHops[level], level, new Route(route, target, depedency, method));
+                addNewRoutePart(routeHops[level], level, new Route(route, target, dependency, method));
             }
         }
     }

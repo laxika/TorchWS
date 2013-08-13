@@ -18,16 +18,16 @@ public class Route {
     private final RequestMethod method;
 
     public Route(String routingUri, Class<? extends WebPage> target) throws NoSuchConstructorException {
-        this(routingUri, target, RouteTarget.NO_DEPEDENCY, RequestMethod.GET);
+        this(routingUri, target, RouteTarget.NO_DEPENDENCY, RequestMethod.GET);
     }
 
-    public Route(String routingUri, Class<? extends WebPage> target, Object[] depedency, RequestMethod method) throws NoSuchConstructorException {
-        if (target == null || depedency == null || method == null) {
+    public Route(String routingUri, Class<? extends WebPage> target, Object[] dependency, RequestMethod method) throws NoSuchConstructorException {
+        if (target == null || dependency == null || method == null) {
             throw new IllegalArgumentException();
         }
 
         this.routingUri = routingUri;
-        this.target = new RouteTarget(target, depedency);
+        this.target = new RouteTarget(target, dependency);
         this.routingHops = routingUri.split("/");
         this.hopCount = routingHops.length;
         this.method = method;

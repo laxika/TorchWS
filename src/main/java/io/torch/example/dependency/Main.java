@@ -1,4 +1,4 @@
-package io.torch.example.depedency;
+package io.torch.example.dependency;
 
 import io.torch.Server;
 
@@ -9,7 +9,7 @@ public class Main {
         Server torch = new Server();
 
         //Adding the helloworld page to the route mapper
-        torch.getRouteManager().defineRoute("/", PageWithDepedency.class, new Object[]{"This is a string depedency", "And another one"});
+        torch.getRouteManager().defineRoute("/", PageWithDependency.class, new Object[]{"This is a string dependency", "And another one"});
 
         //Run the server
         torch.run();

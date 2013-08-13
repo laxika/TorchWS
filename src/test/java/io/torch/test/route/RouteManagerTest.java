@@ -41,7 +41,7 @@ public class RouteManagerTest {
         testTarget.defineRoute("/hello/@variable/@variable2/", HelloWorldWithTwoVar.class);
         testTarget.defineRoute("/hello/@variable/lol/", HelloWorldWithOneVar.class);
         testTarget.defineRoute("/hello/exact/route", HelloWorldExactRoute.class);
-        testTarget.defineRoute("/hello/some/post/route", HelloWorldExactRoute.class, RouteTarget.NO_DEPEDENCY, RequestMethod.POST);
+        testTarget.defineRoute("/hello/some/post/route", HelloWorldExactRoute.class, RouteTarget.NO_DEPENDENCY, RequestMethod.POST);
 
         assert testTarget.calculateRouteByUrl("/", RequestMethod.GET).getTarget().newInstance() instanceof HelloWorldWithTwoVar : "Priority test 0";
         assert testTarget.calculateRouteByUrl("/hello/exact/route", RequestMethod.GET).getTarget().newInstance() instanceof HelloWorldExactRoute : "Priority test 1";
