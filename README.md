@@ -45,6 +45,8 @@ Now your server is ready to run, so feel free to run it and then call http://127
 
 ## More about the routing
 
+### Routing variables
+
 The routing in Torch is pretty complex. You can define routes as you saw in the previous section but not only that, you can also add variables to your routes. For example:
 
 ``` Java
@@ -87,6 +89,8 @@ for (RouteVariable routeVar : request.getRouteData()) {
 }
 ```
 
+### Routing by request method
+
 You can also route GET/POST/PUT/DELETE request to different classes (the defines without `RequestMethod` will handle the GET requests):
 
 ``` Java
@@ -94,6 +98,12 @@ torch.getRouteManager().defineRoute("/hello/exact/route", HelloWorldExactRoute.c
 ```
 
 The routing engine will route all POST requests for the `/hello/exact/route` uri to the `HelloWorldExactRoute` class, while the GET requests for the same uri will return a 404 Not Found error.
+
+### Passing depedencies to WebPages
+
+You can pass down depedencies to WebPage classes via routing.
+
+//EXAMPLEHERE!
 
 ## Handling POST requests
 
