@@ -171,6 +171,10 @@ public class ServingFileHandler extends ChannelInboundHandlerAdapter {
      * @param file file to extract content type
      */
     private static void setContentTypeHeader(HttpResponse response, File file) throws IOException {
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, Files.probeContentType(Paths.get(file.getPath())));
+        String fileMimeType = Files.probeContentType(Paths.get(file.getPath()));
+
+        if (fileMimeType != null) {
+            response.headers().set(HttpHeaders.Names.CONTENT_TYPE, Files.probeContentType(Paths.get(file.getPath())));
+        }
     }
 }
