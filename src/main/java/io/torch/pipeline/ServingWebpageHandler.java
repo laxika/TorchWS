@@ -42,12 +42,12 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
         if (route != null) {
             TorchHttpResponse response = new TorchHttpResponse();
             TorchHttpRequest torchreq = new TorchHttpRequest(request, route);
-            
+
             //Calculating the actual session, if no session data recived, start a new one
             CookieVariable sessionCookie = torchreq.getCookieData().getCookie("SESSID");
-            
+
             Session session;
-            if(sessionCookie != null && sessionManager.getSession(sessionCookie.getValue()) != null) {
+            if (sessionCookie != null && sessionManager.getSession(sessionCookie.getValue()) != null) {
                 session = sessionManager.getSession(sessionCookie.getValue());
             } else {
                 session = sessionManager.startNewSession();
@@ -58,6 +58,23 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
             WebPage webpage = route.getTarget().newInstance();
 
             webpage.handle(torchreq, response, session);
+
+            if (response.isError()) {
+                //TODO: create a general method for sending errors from all handlers - merge this with the one in request validator
+                //but for now I just leave it here, don't start flaming about it, I'll refactor the error handling in the next milestone
+                FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(response.getStatus().toString(), CharsetUtil.UTF_8));
+
+                if (HttpHeaders.isKeepAlive(request)) {
+                    fullresponse.headers().set(HttpHeaders.Names.CONTENT_LENGTH, fullresponse.content().readableBytes());
+                    fullresponse.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+                }
+
+                fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/html; charset=UTF-8");
+
+                ctx.write(fullresponse);
+                ctx.flush();
+                return;
+            }
 
             //Generate the template
             FullHttpResponse fullresponse;

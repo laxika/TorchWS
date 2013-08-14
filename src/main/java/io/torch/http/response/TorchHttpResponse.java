@@ -10,6 +10,7 @@ public class TorchHttpResponse {
     private StringBuilder content = new StringBuilder();
     private HttpResponseStatus status = HttpResponseStatus.OK;
     private String contentType = "text/html; charset=UTF-8";
+    private boolean isError = false;
     private final ReadWriteCookieStorage cookieStorage = new ReadWriteCookieStorage();
     private final ReadWriteHeaderStorage headerStorage = new ReadWriteHeaderStorage();
 
@@ -57,5 +58,14 @@ public class TorchHttpResponse {
         
         //Add the location header
         headerStorage.setHeader(Names.LOCATION, target);
+    }
+    
+    public void error(int errorId) {
+        status = HttpResponseStatus.valueOf(errorId);
+        isError = true;
+    }
+    
+    public boolean isError() {
+        return isError;
     }
 }
