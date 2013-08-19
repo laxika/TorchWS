@@ -40,6 +40,7 @@ public class HttpRequestValidator extends ChannelInboundHandlerAdapter {
             return;
         }
 
+        request.release();
         ctx.fireChannelRead(msg);
     }
 }

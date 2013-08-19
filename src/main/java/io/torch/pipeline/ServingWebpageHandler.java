@@ -78,7 +78,7 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
             //Generate the template
             FullHttpResponse fullresponse;
-            if (webpage instanceof Templateable) {
+            if (webpage instanceof Templateable && ((Templateable) webpage).getTemplate() != null) {
                 Template temp = templateManager.getTemplate(((Templateable) webpage).getTemplate());
 
                 StringWriter templateText = new StringWriter();
@@ -129,6 +129,7 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        cause.printStackTrace();
         ctx.close();
     }
 }
