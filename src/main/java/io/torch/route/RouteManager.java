@@ -7,6 +7,7 @@ import io.torch.route.container.DynamicRouteContainer;
 import io.torch.route.container.StaticRouteContainer;
 import io.torch.util.ArrayUtils;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Iterator;
 
 public class RouteManager {
@@ -14,15 +15,18 @@ public class RouteManager {
     private final StaticRouteContainer staticRouteContainer = new StaticRouteContainer();
     private final DynamicRouteContainer dynamicRouteContainer = new DynamicRouteContainer();
 
+    /**
+     * Add a new route to the defined routes.
+     *
+     * @param route the uri of the route
+     * @param target the target of the route
+     */
     public void defineRoute(String route, Class<? extends WebPage> target) throws NoSuchConstructorException {
         defineRoute(route, target, RouteTarget.NO_DEPENDENCY, RequestMethod.GET);
     }
 
     /**
      * Add a new route to the defined routes.
-     *
-     * @param route the uri of the route
-     * @param target the target of the route
      */
     public void defineRoute(String route, Class<? extends WebPage> target, Object[] dependency) throws NoSuchConstructorException {
         defineRoute(route, target, dependency, RequestMethod.GET);
@@ -30,9 +34,6 @@ public class RouteManager {
 
     /**
      * Add a new route to the defined routes.
-     *
-     * @param route the uri of the route
-     * @param target the target of the route
      */
     public void defineRoute(String route, Class<? extends WebPage> target, Object[] dependency, RequestMethod method) throws NoSuchConstructorException {
         String[] routeHops = route.split("/");
@@ -43,6 +44,15 @@ public class RouteManager {
             for (int level = 1; level < routeHops.length; level++) {
                 addNewRoutePart(routeHops[level], level, new Route(route, target, dependency, method));
             }
+        }
+    }
+
+    /**
+     * Add a new route to the defined routes.
+     */
+    public void defineRoute(String route, Class<? extends WebPage> target, Object[] dependency, EnumSet<RequestMethod> methods) throws NoSuchConstructorException {
+        for(RequestMethod method : methods) {
+            defineRoute(route, target, dependency, method);
         }
     }
 

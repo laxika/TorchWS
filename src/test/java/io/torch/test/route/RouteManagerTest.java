@@ -7,6 +7,7 @@ import io.torch.http.request.RequestMethod;
 import io.torch.route.RouteManager;
 import io.torch.route.RouteTarget;
 import io.torch.test.page.TestRouteWithDependency;
+import java.util.EnumSet;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -77,5 +78,13 @@ public class RouteManagerTest {
         
         assert ((TestRouteWithDependency)testTarget.calculateRouteByUrl("/", RequestMethod.GET).getTarget().newInstance()).getDependencyOne().equals("Dependency One") : "Dependency test 1";
         assert ((TestRouteWithDependency)testTarget.calculateRouteByUrl("/", RequestMethod.GET).getTarget().newInstance()).getDependencyTwo().equals("Dependency Two") : "Dependency test 2";
+    }
+    
+    @Test
+    public void testRouteEnums() throws Exception {
+        testTarget.defineRoute("/hello/some/post/route", HelloWorldExactRoute.class, RouteTarget.NO_DEPENDENCY, EnumSet.of(RequestMethod.POST, RequestMethod.GET));
+        
+        assert testTarget.calculateRouteByUrl("/hello/some/post/route", RequestMethod.GET).getTarget().newInstance() instanceof HelloWorldExactRoute : "Enum test 1";
+        assert testTarget.calculateRouteByUrl("/hello/some/post/route", RequestMethod.POST).getTarget().newInstance() instanceof HelloWorldExactRoute : "Enum test 2";
     }
 }
