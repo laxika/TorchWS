@@ -1,6 +1,6 @@
 package io.torch.example.helloworld;
 
-import io.torch.torchws.Server;
+import io.torch.Server;
 
 public class Main {
 

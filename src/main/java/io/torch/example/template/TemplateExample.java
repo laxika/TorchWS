@@ -1,10 +1,10 @@
 package io.torch.example.template;
 
-import io.torch.torchws.controller.WebPage;
-import io.torch.torchws.http.request.TorchHttpRequest;
-import io.torch.torchws.http.response.TorchHttpResponse;
-import io.torch.torchws.session.Session;
-import io.torch.torchws.template.Templateable;
+import io.torch.controller.WebPage;
+import io.torch.http.request.TorchHttpRequest;
+import io.torch.http.response.TorchHttpResponse;
+import io.torch.session.Session;
+import io.torch.template.Templateable;
 
 public class TemplateExample extends WebPage implements Templateable {
 

@@ -1,9 +1,9 @@
 package io.torch.example.routing;
 
-import io.torch.torchws.controller.WebPage;
-import io.torch.torchws.http.request.TorchHttpRequest;
-import io.torch.torchws.http.response.TorchHttpResponse;
-import io.torch.torchws.session.Session;
+import io.torch.controller.WebPage;
+import io.torch.http.request.TorchHttpRequest;
+import io.torch.http.response.TorchHttpResponse;
+import io.torch.session.Session;
 
 
 public class HelloWorldWithOneVar extends WebPage {

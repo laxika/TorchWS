@@ -1,7 +1,7 @@
 package io.torch.test.cookie;
 
-import io.torch.torchws.cookie.CookieVariable;
-import io.torch.torchws.cookie.ReadOnlyCookieDataStorage;
+import io.torch.cookie.CookieVariable;
+import io.torch.cookie.ReadOnlyCookieDataStorage;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
