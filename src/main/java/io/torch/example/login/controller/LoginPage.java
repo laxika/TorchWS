@@ -1,11 +1,11 @@
 package io.torch.example.login.controller;
 
-import io.torch.controller.WebPage;
-import io.torch.http.request.RequestMethod;
-import io.torch.http.request.TorchHttpRequest;
-import io.torch.http.response.TorchHttpResponse;
-import io.torch.session.Session;
-import io.torch.template.Templateable;
+import io.torch.torchws.controller.WebPage;
+import io.torch.torchws.http.request.RequestMethod;
+import io.torch.torchws.http.request.TorchHttpRequest;
+import io.torch.torchws.http.response.TorchHttpResponse;
+import io.torch.torchws.session.Session;
+import io.torch.torchws.template.Templateable;
 
 public class LoginPage extends WebPage implements Templateable {
 

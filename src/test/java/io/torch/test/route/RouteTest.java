@@ -1,9 +1,9 @@
 package io.torch.test.route;
 
 import io.torch.example.routing.HelloWorldExactRoute;
-import io.torch.exception.NoSuchConstructorException;
-import io.torch.route.Route;
-import io.torch.route.RouteVariable;
+import io.torch.torchws.exception.NoSuchConstructorException;
+import io.torch.torchws.route.Route;
+import io.torch.torchws.route.RouteVariable;
 import java.util.HashMap;
 import org.testng.annotations.Test;
 

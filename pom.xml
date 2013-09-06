@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.torch</groupId>
-    <artifactId>TorchWS</artifactId>
+    <artifactId>torchws</artifactId>
     <version>v0.1.4a</version>
     <packaging>jar</packaging>
 

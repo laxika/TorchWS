@@ -1,6 +1,6 @@
 package io.torch.example.sessions;
 
-import io.torch.Server;
+import io.torch.torchws.Server;
 
 public class Main {
 

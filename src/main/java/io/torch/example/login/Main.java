@@ -1,11 +1,11 @@
 package io.torch.example.login;
 
-import io.torch.Server;
+import io.torch.torchws.Server;
 import io.torch.example.login.controller.IndexPage;
 import io.torch.example.login.controller.LoginPage;
 import io.torch.example.login.controller.LogoutPage;
-import io.torch.http.request.RequestMethod;
-import io.torch.route.RouteTarget;
+import io.torch.torchws.http.request.RequestMethod;
+import io.torch.torchws.route.RouteTarget;
 
 public class Main {
 

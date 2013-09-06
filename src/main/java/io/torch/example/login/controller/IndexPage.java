@@ -1,11 +1,11 @@
 package io.torch.example.login.controller;
 
 import io.torch.example.login.data.IndexData;
-import io.torch.controller.WebPage;
-import io.torch.http.request.TorchHttpRequest;
-import io.torch.http.response.TorchHttpResponse;
-import io.torch.session.Session;
-import io.torch.template.Templateable;
+import io.torch.torchws.controller.WebPage;
+import io.torch.torchws.http.request.TorchHttpRequest;
+import io.torch.torchws.http.response.TorchHttpResponse;
+import io.torch.torchws.session.Session;
+import io.torch.torchws.template.Templateable;
 
 public class IndexPage extends WebPage implements Templateable {
     

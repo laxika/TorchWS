@@ -1,7 +1,7 @@
 
 package io.torch.example.template;
 
-import io.torch.Server;
+import io.torch.torchws.Server;
 
 public class Main {
 
