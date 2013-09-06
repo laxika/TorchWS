@@ -209,5 +209,8 @@ The `getTemplate()` method must return the template's path relative to the `temp
 
 Torch can server static files too but if you plan to do a bigger site we suggest you to use a CDN for this task instead. Put your static files to the `public` folder and they will be served if no matching route found for the given uri.
 
+## Hosting on Heroku
+
+For a detailed step by step tutorial on how to use Torch on Heroku please check [this](https://github.com/laxika/TorchWsHerokuExample) repository.
 
 
