@@ -2,6 +2,7 @@ package io.torch.pipeline;
 
 import freemarker.template.Template;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -114,7 +115,11 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
             }
 
             // Write the response.
-            ctx.write(fullresponse);
+            if (!HttpHeaders.isKeepAlive(request)) {
+                ctx.write(fullresponse).addListener(ChannelFutureListener.CLOSE);
+            } else {
+                ctx.write(fullresponse);
+            }
             ctx.flush();
             request.release();
         } else {
