@@ -5,6 +5,8 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.Cookie;
+import io.netty.handler.codec.http.DefaultCookie;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -52,7 +54,7 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
                 session = sessionManager.getSession(sessionCookie.getValue());
             } else {
                 session = sessionManager.startNewSession();
-                response.getCookieData().addCookie(new CookieVariable("SESSID", session.getSessionId()));
+                response.getCookieData().addCookie(new CookieVariable("SESSID", session.getSessionId(), "/"));
             }
 
             //Instantiate a new WebPage object and handle the request
@@ -104,7 +106,12 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
             //Setting the new cookies
             for (CookieVariable cookie : response.getCookieData()) {
-                fullresponse.headers().add(Names.SET_COOKIE, ServerCookieEncoder.encode(cookie.getName(), cookie.getValue()));
+                DefaultCookie realCookie = new DefaultCookie(cookie.getName(), cookie.getValue());
+                
+                if(cookie.getPath() != null) {
+                    realCookie.setPath(cookie.getPath());
+                }
+                fullresponse.headers().set(Names.SET_COOKIE, ServerCookieEncoder.encode(realCookie));
             }
 
             //Setting the headers

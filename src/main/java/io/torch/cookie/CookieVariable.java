@@ -7,10 +7,16 @@ public class CookieVariable {
 
     private final String name;
     private final String value;
+    private final String path;
 
-    public CookieVariable(String cookieName, String cookieValue) {
-        this.name = cookieName;
-        this.value = cookieValue;
+    public CookieVariable(String name, String value) {
+        this(name, value, null);
+    }
+
+    public CookieVariable(String name, String value, String path) {
+        this.name = name;
+        this.value = value;
+        this.path = path;
     }
 
     public String getName() {
@@ -19,6 +25,10 @@ public class CookieVariable {
 
     public String getValue() {
         return value;
+    }
+    
+    public String getPath() {
+        return path;
     }
 
     @Override
