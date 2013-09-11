@@ -11,6 +11,9 @@ import io.torch.pipeline.HttpRequestValidator;
 import io.torch.pipeline.ServingFileHandler;
 import io.torch.pipeline.ServingWebpageHandler;
 
+/**
+ * Initialize the server pipeline.
+ */
 public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     
     @Override

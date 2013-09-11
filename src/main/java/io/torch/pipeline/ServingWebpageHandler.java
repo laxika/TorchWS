@@ -54,7 +54,7 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
                 session = sessionManager.getSession(sessionCookie.getValue());
             } else {
                 session = sessionManager.startNewSession();
-                response.getCookieData().addCookie(new CookieVariable("SESSID", session.getSessionId(), "/"));
+                response.getCookieData().putCookie(new CookieVariable("SESSID", session.getSessionId(), "/"));
             }
 
             //Instantiate a new WebPage object and handle the request

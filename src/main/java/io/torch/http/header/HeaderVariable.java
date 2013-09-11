@@ -1,6 +1,9 @@
 
 package io.torch.http.header;
 
+/**
+ * A header variable come with the http request.
+ */
 public class HeaderVariable {
 
     private final String name;

@@ -1,19 +1,23 @@
 package io.torch.cookie;
 
+import io.netty.handler.codec.http.Cookie;
 import io.netty.handler.codec.http.CookieDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * A read only data storage for CookieVariables.
+ */
 public class ReadOnlyCookieDataStorage implements Iterable<CookieVariable> {
 
-    private HashMap<String, CookieVariable> cookieStorage = new HashMap<>();
+    private final HashMap<String, CookieVariable> cookieStorage = new HashMap<>();
 
     public ReadOnlyCookieDataStorage(String cookieString) {
         if (cookieString != null) {
-            Set<io.netty.handler.codec.http.Cookie> cookies = CookieDecoder.decode(cookieString);
+            Set<Cookie> cookies = CookieDecoder.decode(cookieString);
 
-            for (io.netty.handler.codec.http.Cookie cookie : cookies) {
+            for (Cookie cookie : cookies) {
                 cookieStorage.put(cookie.getName(), new CookieVariable(cookie.getName(), cookie.getValue()));
             }
         }

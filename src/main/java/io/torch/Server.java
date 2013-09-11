@@ -9,21 +9,28 @@ import io.torch.util.ChannelVariable;
 import io.torch.util.Configuration;
 
 /**
- * Initialize the server.
+ * The server's entry class.
  */
 public class Server {
 
     private final RouteManager container = new RouteManager();
     private final Configuration config = new Configuration();
-    
+
+    /**
+     * Initialize a new TorchWS server.
+     */
     public Server() {
-        
     }
-    
+
+    /**
+     * Initialize a new TorchWS server on a given port.
+     * 
+     * @param port the target port
+     */
     public Server(int port) {
         config.setProperty("listener.port", port);
     }
-    
+
     /**
      * Start the server. Call this method after setting up every configuration/routes correctly.
      *
@@ -50,8 +57,8 @@ public class Server {
     }
 
     /**
-     * Return the RouteManager. You can define routes.
-     * 
+     * Return the RouteManager. You can define routes here.
+     *
      * @return the route manage
      */
     public RouteManager getRouteManager() {

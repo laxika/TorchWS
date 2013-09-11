@@ -1,5 +1,8 @@
 package io.torch.http.post;
 
+/**
+ * A post variable come with the http request.
+ */
 public class PostVariable {
 
     private final String variableName;

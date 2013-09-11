@@ -5,9 +5,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+/**
+ * A read only data storage for HeaderVariables.
+ */
 public class ReadOnlyHeaderDataStorage implements Iterable<HeaderVariable> {
 
-    private HashMap<String, HeaderVariable> headerStorage = new HashMap<>();
+    private final HashMap<String, HeaderVariable> headerStorage = new HashMap<>();
 
     public ReadOnlyHeaderDataStorage(HttpHeaders headers) {
         for(Entry<String, String> header: headers) {

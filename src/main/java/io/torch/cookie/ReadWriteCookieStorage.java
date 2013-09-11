@@ -3,11 +3,14 @@ package io.torch.cookie;
 import java.util.HashMap;
 import java.util.Iterator;
 
+/**
+ * A read/write only data storage for CookieVariables.
+ */
 public class ReadWriteCookieStorage implements Iterable<CookieVariable> {
 
     public HashMap<String, CookieVariable> cookieStorage = new HashMap<>();
 
-    public void addCookie(CookieVariable cookie) {
+    public void putCookie(CookieVariable cookie) {
         cookieStorage.put(cookie.getName(), cookie);
     }
 

@@ -10,9 +10,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * A read only data storage for PostVariables.
+ */
 public class ReadOnlyPostDataStorage implements Iterable<PostVariable> {
 
-    private HashMap<String, PostVariable> postVariableStorage = new HashMap<>();
+    private final HashMap<String, PostVariable> postVariableStorage = new HashMap<>();
 
     public ReadOnlyPostDataStorage(HttpRequest request) {
         if (request.getMethod() == HttpMethod.POST) {
