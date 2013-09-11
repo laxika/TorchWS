@@ -1,6 +1,5 @@
 package io.torch.pipeline;
 
-import freemarker.template.Template;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -29,7 +28,6 @@ import io.torch.session.SessionManager;
 import io.torch.template.TemplateManager;
 import io.torch.template.Templateable;
 import io.torch.util.ChannelVariable;
-import java.io.StringWriter;
 import java.util.Map;
 
 public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
@@ -64,36 +62,22 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
             webpage.handle(torchreq, response, session);
 
-            if (response.getStatus() instanceof ServerErrorResponseStatus || response.getStatus() instanceof ClientErrorResponseStatus) {
-                //TODO: create a general method for sending errors from all handlers - merge this with the one in request validator
-                //but for now I just leave it here, don't start flaming about it, I'll refactor the error handling in the next milestone
-                FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(response.getStatus().toString(), CharsetUtil.UTF_8));
-
-                if (HttpHeaders.isKeepAlive(request)) {
-                    fullresponse.headers().set(HttpHeaders.Names.CONTENT_LENGTH, fullresponse.content().readableBytes());
-                    fullresponse.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-                }
-
-                fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/html; charset=UTF-8");
-
-                ctx.write(fullresponse);
-                ctx.flush();
-                request.release();
-                return;
-            }
-
-            //Generate the template
             FullHttpResponse fullresponse;
-            if (webpage instanceof Templateable && ((Templateable) webpage).getTemplate() != null) {
-                Template temp = templateManager.getTemplate(((Templateable) webpage).getTemplate());
-
-                StringWriter templateText = new StringWriter();
-
-                temp.process(((Templateable) webpage).getTemplateRoot(), templateText);
-
-                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateText.toString(), CharsetUtil.UTF_8));
+            if (response.getStatus() instanceof ServerErrorResponseStatus || response.getStatus() instanceof ClientErrorResponseStatus) {
+                if (templateManager.isTemplateExist("error/" + response.getStatus().getStatusCode() + ".tpl")) {
+                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate("error/" + response.getStatus().getStatusCode() + ".tpl", null), CharsetUtil.UTF_8));
+                } else {
+                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer("Error " + response.getStatus().getStatusCode(), CharsetUtil.UTF_8));
+                }
             } else {
-                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
+                //Generate the template
+                if (webpage instanceof Templateable && ((Templateable) webpage).getTemplate() != null) {
+                    Templateable templateableWebpage = (Templateable) webpage;
+
+                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate(templateableWebpage.getTemplate(), templateableWebpage.getTemplateRoot()), CharsetUtil.UTF_8));
+                } else {
+                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
+                }
             }
 
             if (HttpHeaders.isKeepAlive(request)) {
@@ -109,8 +93,8 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
             //Setting the new cookies
             for (CookieVariable cookie : response.getCookieData()) {
                 DefaultCookie realCookie = new DefaultCookie(cookie.getName(), cookie.getValue());
-                
-                if(cookie.getPath() != null) {
+
+                if (cookie.getPath() != null) {
                     realCookie.setPath(cookie.getPath());
                 }
                 fullresponse.headers().set(Names.SET_COOKIE, ServerCookieEncoder.encode(realCookie));

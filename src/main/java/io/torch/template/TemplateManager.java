@@ -2,11 +2,12 @@ package io.torch.template;
 
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
-import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.Version;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,14 +41,17 @@ public class TemplateManager {
             Logger.getLogger(TemplateManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public Template getTemplate(String templateName) {
-        try {
-            return cfg.getTemplate(templateName);
-        } catch (IOException ex) {
-            Logger.getLogger(TemplateManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return null;
+
+    public boolean isTemplateExist(String templateName) throws IOException {
+        return cfg.getTemplateLoader().findTemplateSource(templateName) == null;
+    }
+
+    public String processTemplate(String templateName, Object templateData) throws TemplateException, IOException {
+        StringWriter templateText = new StringWriter();
+
+        cfg.getTemplate(templateName).process(templateData, templateText);
+
+        return templateText.toString();
+
     }
 }

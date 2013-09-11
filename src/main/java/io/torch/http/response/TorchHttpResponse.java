@@ -3,10 +3,8 @@ package io.torch.http.response;
 import io.netty.handler.codec.http.HttpHeaders.Names;
 import io.torch.cookie.ReadWriteCookieStorage;
 import io.torch.http.header.ReadWriteHeaderStorage;
-import io.torch.http.response.status.ClientErrorResponseStatus;
 import io.torch.http.response.status.RedirectionResponseStatus;
 import io.torch.http.response.status.ResponseStatus;
-import io.torch.http.response.status.ServerErrorResponseStatus;
 import io.torch.http.response.status.SuccessfulResponseStatus;
 
 public class TorchHttpResponse {
