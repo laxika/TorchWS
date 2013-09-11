@@ -62,12 +62,4 @@ public class TorchHttpResponse {
         //Add the location header
         headerStorage.setHeader(Names.LOCATION, target);
     }
-
-    public void error(ClientErrorResponseStatus error) {
-        status = error;
-    }
-
-    public void error(ServerErrorResponseStatus error) {
-        status = error;
-    }
 }
