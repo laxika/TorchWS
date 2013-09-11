@@ -5,13 +5,13 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.Cookie;
 import io.netty.handler.codec.http.DefaultCookie;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders.Names;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
@@ -20,6 +20,8 @@ import io.torch.cookie.CookieVariable;
 import io.torch.http.request.RequestMethod;
 import io.torch.http.request.TorchHttpRequest;
 import io.torch.http.response.TorchHttpResponse;
+import io.torch.http.response.status.ClientErrorResponseStatus;
+import io.torch.http.response.status.ServerErrorResponseStatus;
 import io.torch.route.Route;
 import io.torch.route.RouteManager;
 import io.torch.session.Session;
@@ -62,10 +64,10 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
             webpage.handle(torchreq, response, session);
 
-            if (response.isError()) {
+            if (response.getStatus() instanceof ServerErrorResponseStatus || response.getStatus() instanceof ClientErrorResponseStatus) {
                 //TODO: create a general method for sending errors from all handlers - merge this with the one in request validator
                 //but for now I just leave it here, don't start flaming about it, I'll refactor the error handling in the next milestone
-                FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(response.getStatus().toString(), CharsetUtil.UTF_8));
+                FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(response.getStatus().toString(), CharsetUtil.UTF_8));
 
                 if (HttpHeaders.isKeepAlive(request)) {
                     fullresponse.headers().set(HttpHeaders.Names.CONTENT_LENGTH, fullresponse.content().readableBytes());
@@ -89,9 +91,9 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
                 temp.process(((Templateable) webpage).getTemplateRoot(), templateText);
 
-                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(templateText.toString(), CharsetUtil.UTF_8));
+                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateText.toString(), CharsetUtil.UTF_8));
             } else {
-                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, response.getStatus(), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
+                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
             }
 
             if (HttpHeaders.isKeepAlive(request)) {

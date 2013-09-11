@@ -1,18 +1,21 @@
 package io.torch.http.response;
 
 import io.netty.handler.codec.http.HttpHeaders.Names;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.torch.cookie.ReadWriteCookieStorage;
 import io.torch.http.header.ReadWriteHeaderStorage;
+import io.torch.http.response.status.ClientErrorResponseStatus;
+import io.torch.http.response.status.RedirectionResponseStatus;
+import io.torch.http.response.status.ResponseStatus;
+import io.torch.http.response.status.ServerErrorResponseStatus;
+import io.torch.http.response.status.SuccessfulResponseStatus;
 
 public class TorchHttpResponse {
 
-    private StringBuilder content = new StringBuilder();
-    private HttpResponseStatus status = HttpResponseStatus.OK;
-    private String contentType = "text/html; charset=UTF-8";
-    private boolean isError = false;
     private final ReadWriteCookieStorage cookieStorage = new ReadWriteCookieStorage();
     private final ReadWriteHeaderStorage headerStorage = new ReadWriteHeaderStorage();
+    private final StringBuilder content = new StringBuilder();
+    private ResponseStatus status = SuccessfulResponseStatus.OK;
+    private String contentType = "text/html; charset=UTF-8";
 
     public void appendContent(String text) {
         content.append(text);
@@ -22,11 +25,11 @@ public class TorchHttpResponse {
         return content.toString();
     }
 
-    public HttpResponseStatus getStatus() {
+    public ResponseStatus getStatus() {
         return status;
     }
 
-    public void setStatus(HttpResponseStatus status) {
+    public void setStatus(ResponseStatus status) {
         this.status = status;
     }
 
@@ -41,31 +44,30 @@ public class TorchHttpResponse {
     /**
      * Return the cookie storage for new, need to send cookies. Only add cookies
      * what you plan to send to the client.
-     * 
+     *
      * @return the cookie storage
      */
     public ReadWriteCookieStorage getCookieData() {
         return cookieStorage;
     }
-    
+
     public ReadWriteHeaderStorage getHeaderData() {
         return headerStorage;
     }
-    
+
     public void redirect(String target) {
         //Set the status to 303 (see other)
-        status = HttpResponseStatus.SEE_OTHER;
-        
+        status = RedirectionResponseStatus.SEE_OTHER;
+
         //Add the location header
         headerStorage.setHeader(Names.LOCATION, target);
     }
-    
-    public void error(int errorId) {
-        status = HttpResponseStatus.valueOf(errorId);
-        isError = true;
+
+    public void error(ClientErrorResponseStatus error) {
+        status = error;
     }
-    
-    public boolean isError() {
-        return isError;
+
+    public void error(ServerErrorResponseStatus error) {
+        status = error;
     }
 }
