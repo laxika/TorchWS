@@ -17,24 +17,25 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.util.CharsetUtil;
+import io.torch.file.MimeTypeDetector;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
+import org.apache.commons.io.FilenameUtils;
 
 public class ServingFileHandler extends ChannelInboundHandlerAdapter {
 
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
     public static final int HTTP_CACHE_SECONDS = 60;
+    private static final MimeTypeDetector mimeDetector= new MimeTypeDetector();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -174,10 +175,6 @@ public class ServingFileHandler extends ChannelInboundHandlerAdapter {
      * @param file file to extract content type
      */
     private static void setContentTypeHeader(HttpResponse response, File file) throws IOException {
-        String fileMimeType = Files.probeContentType(Paths.get(file.getPath()));
-
-        if (fileMimeType != null) {
-            response.headers().set(HttpHeaders.Names.CONTENT_TYPE, Files.probeContentType(Paths.get(file.getPath())));
-        }
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE,mimeDetector.getMimeByExtension(FilenameUtils.getExtension(file.getName())));
     }
 }
