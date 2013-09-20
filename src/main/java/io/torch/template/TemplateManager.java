@@ -43,7 +43,7 @@ public class TemplateManager {
     }
 
     public boolean isTemplateExist(String templateName) throws IOException {
-        return cfg.getTemplateLoader().findTemplateSource(templateName) == null;
+        return cfg.getTemplateLoader().findTemplateSource(templateName) != null;
     }
 
     public String processTemplate(String templateName, Object templateData) throws TemplateException, IOException {
