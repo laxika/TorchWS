@@ -5,6 +5,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.torch.route.RouteManager;
+import io.torch.session.DefaultSessionManager;
+import io.torch.session.SessionManager;
 import io.torch.util.ChannelVariable;
 import io.torch.util.Configuration;
 
@@ -13,22 +15,29 @@ import io.torch.util.Configuration;
  */
 public class Server {
 
-    private final RouteManager container = new RouteManager();
+    private final RouteManager routeManager = new RouteManager();
+    private final SessionManager sessionManager;
     private final Configuration config = new Configuration();
 
     /**
      * Initialize a new TorchWS server.
      */
     public Server() {
+        sessionManager = new DefaultSessionManager();
     }
 
     /**
      * Initialize a new TorchWS server on a given port.
-     * 
+     *
      * @param port the target port
      */
     public Server(int port) {
+        this(port, new DefaultSessionManager());
+    }
+
+    public Server(int port, SessionManager sessionManager) {
         config.setProperty("listener.port", port);
+        this.sessionManager = sessionManager;
     }
 
     /**
@@ -47,7 +56,8 @@ public class Server {
             serverBootstrap.channel(NioServerSocketChannel.class);
             serverBootstrap.childHandler(new ServerInitializer());
 
-            serverBootstrap.childAttr(ChannelVariable.ROUTE_MANAGER.getVariableKey(), container);
+            serverBootstrap.childAttr(ChannelVariable.ROUTE_MANAGER.getVariableKey(), routeManager);
+            serverBootstrap.childAttr(ChannelVariable.SESSION_MANAGER.getVariableKey(), sessionManager);
 
             serverBootstrap.bind(config.getInt("listener.port")).sync().channel().closeFuture().sync();
         } finally {
@@ -62,6 +72,6 @@ public class Server {
      * @return the route manage
      */
     public RouteManager getRouteManager() {
-        return container;
+        return routeManager;
     }
 }

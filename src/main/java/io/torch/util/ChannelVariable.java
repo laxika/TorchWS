@@ -4,7 +4,8 @@ import io.netty.util.AttributeKey;
 
 public enum ChannelVariable {
     
-    ROUTE_MANAGER(new AttributeKey<>("RouteManager"));
+    ROUTE_MANAGER(new AttributeKey<>("RouteManager")),
+    SESSION_MANAGER(new AttributeKey<>("SessionManager"));
     
     private AttributeKey<Object> var;
     

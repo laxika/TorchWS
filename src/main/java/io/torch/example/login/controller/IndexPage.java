@@ -1,7 +1,7 @@
 package io.torch.example.login.controller;
 
-import io.torch.example.login.data.IndexData;
 import io.torch.controller.WebPage;
+import io.torch.example.login.data.IndexData;
 import io.torch.http.request.TorchHttpRequest;
 import io.torch.http.response.TorchHttpResponse;
 import io.torch.session.Session;

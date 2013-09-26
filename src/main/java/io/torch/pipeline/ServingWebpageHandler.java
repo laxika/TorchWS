@@ -32,7 +32,6 @@ import java.util.Map;
 
 public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
-    protected static SessionManager sessionManager = new SessionManager();
     protected static TemplateManager templateManager = new TemplateManager();
 
     @Override
@@ -48,6 +47,8 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
             //Calculating the actual session, if no session data recived, start a new one
             CookieVariable sessionCookie = torchreq.getCookieData().getCookie("SESSID");
+            
+            SessionManager sessionManager = (SessionManager) ctx.channel().attr(ChannelVariable.SESSION_MANAGER.getVariableKey()).get();
 
             Session session;
             if (sessionCookie != null && sessionManager.getSession(sessionCookie.getValue()) != null) {
