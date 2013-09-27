@@ -57,6 +57,10 @@ public class ServingFileHandler extends ChannelInboundHandlerAdapter {
                 return;
             }
         } catch (IOException e) {
+        	// If something went wrong we're better off just denying it
+            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, request);
+            ctx.flush();
+            request.release();
             return;
         }
 
