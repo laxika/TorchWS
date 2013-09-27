@@ -36,12 +36,29 @@ public class ServingFileHandler extends ChannelInboundHandlerAdapter {
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
     public static final int HTTP_CACHE_SECONDS = 60;
     private static final MimeTypeDetector mimeDetector= new MimeTypeDetector();
+    
+    private static final File PUBLIC_FOLDER = new File("public");
+    private static final String PUBLIC_PATH = PUBLIC_FOLDER.getAbsolutePath();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         FullHttpRequest request = (FullHttpRequest) msg;
 
-        File file = new File("public" + request.getUri());
+        File file = new File(PUBLIC_FOLDER, request.getUri());
+        
+        // Validate path
+        try {
+            String requestPath = file.getCanonicalPath();
+            if (!requestPath.startsWith(PUBLIC_PATH)) {
+                //Send back not found 404
+                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, request);
+                ctx.flush();
+                request.release();
+                return;
+            }
+        } catch (IOException e) {
+            return;
+        }
 
         if (file.exists() && file.isFile()) {
             // Cache Validation
