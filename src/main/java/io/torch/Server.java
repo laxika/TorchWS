@@ -15,15 +15,15 @@ import io.torch.util.Configuration;
  */
 public class Server {
 
-    private final RouteManager routeManager = new RouteManager();
-    private final SessionManager sessionManager;
     private final Configuration config = new Configuration();
+    private final RouteManager routeManager;
+    private final SessionManager sessionManager;
 
     /**
      * Initialize a new TorchWS server.
      */
     public Server() {
-        sessionManager = new DefaultSessionManager();
+        this(new Builder());
     }
 
     /**
@@ -32,12 +32,14 @@ public class Server {
      * @param port the target port
      */
     public Server(int port) {
-        this(port, new DefaultSessionManager());
-    }
-
-    public Server(int port, SessionManager sessionManager) {
+        this(new Builder());
+        
         config.setProperty("listener.port", port);
-        this.sessionManager = sessionManager;
+    }
+    
+    private Server(Builder builder) {
+        this.sessionManager = builder.sessionManager;
+        this.routeManager = builder.routeManager;
     }
 
     /**
@@ -73,5 +75,21 @@ public class Server {
      */
     public RouteManager getRouteManager() {
         return routeManager;
+    }
+    
+    /**
+     * Use this class to build a new server instance with custom session/route etc... managers.
+     */
+    public static class Builder {
+        private SessionManager sessionManager = new DefaultSessionManager();
+        private RouteManager routeManager = new RouteManager(); //Opening the RouteManager need some future work
+        
+        public void setSessionManager(SessionManager sessionManager) {
+            this.sessionManager = sessionManager;
+        }
+        
+        public Server build() {
+            return new Server(this);
+        }
     }
 }
