@@ -4,7 +4,7 @@
 
     <groupId>io.torch</groupId>
     <artifactId>torchws</artifactId>
-    <version>v0.1.4a</version>
+    <version>v0.1.5a</version>
     <packaging>jar</packaging>
 
     <name>TorchWS</name>
