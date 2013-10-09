@@ -42,7 +42,10 @@ public class ReadOnlyCookieDataStorageTest {
         }
 
         assert amount == 2 : "Cookie test";
-
+    }
+    
+    @Test
+    public void testStorageForeachLoopForEmptyStorage() throws Exception {
         storage = new ReadOnlyCookieDataStorage(null);
         
         for (CookieVariable cookie : storage) {

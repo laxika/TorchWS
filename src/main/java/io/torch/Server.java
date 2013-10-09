@@ -15,7 +15,7 @@ import io.torch.util.Configuration;
 /**
  * The server's entry class.
  */
-public class Server {
+public final class Server {
 
     private final Configuration config = new Configuration();
     private final RouteManager routeManager;

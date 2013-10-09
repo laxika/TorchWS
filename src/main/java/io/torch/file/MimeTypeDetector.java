@@ -15,7 +15,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 /**
- * A mime detection class until we drop support for Java7. (It's adresses the
+ * A mime detection class until we drop support for Java7. (It's addresses the
  * mime detection problems on mac and linux under Java7.)
  */
 public class MimeTypeDetector {

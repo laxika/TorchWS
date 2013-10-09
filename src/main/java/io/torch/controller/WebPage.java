@@ -12,8 +12,8 @@ public abstract class WebPage {
     /**
      * This method is called to handle the request. You can manipulate the response in this method.
      * 
-     * @param request the http request
-     * @param response the http response
+     * @param request the HTTP request
+     * @param response the HTTP response
      * @param session the user's session
      */
     public abstract void handle(TorchHttpRequest request, TorchHttpResponse response, Session session);
