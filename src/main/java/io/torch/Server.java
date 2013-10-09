@@ -7,6 +7,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.torch.route.RouteManager;
 import io.torch.session.DefaultSessionManager;
 import io.torch.session.SessionManager;
+import io.torch.template.DefaultTemplateManager;
+import io.torch.template.TemplateManager;
 import io.torch.util.ChannelVariable;
 import io.torch.util.Configuration;
 
@@ -18,6 +20,7 @@ public class Server {
     private final Configuration config = new Configuration();
     private final RouteManager routeManager;
     private final SessionManager sessionManager;
+    private final TemplateManager templateManager;
 
     /**
      * Initialize a new TorchWS server.
@@ -40,6 +43,7 @@ public class Server {
     private Server(Builder builder) {
         this.sessionManager = builder.sessionManager;
         this.routeManager = builder.routeManager;
+        this.templateManager = builder.templateManager;
     }
 
     /**
@@ -60,6 +64,7 @@ public class Server {
 
             serverBootstrap.childAttr(ChannelVariable.ROUTE_MANAGER.getVariableKey(), routeManager);
             serverBootstrap.childAttr(ChannelVariable.SESSION_MANAGER.getVariableKey(), sessionManager);
+            serverBootstrap.childAttr(ChannelVariable.TEMPLATE_MANAGER.getVariableKey(), templateManager);
 
             serverBootstrap.bind(config.getInt("listener.port")).sync().channel().closeFuture().sync();
         } finally {
@@ -83,9 +88,14 @@ public class Server {
     public static class Builder {
         private SessionManager sessionManager = new DefaultSessionManager();
         private RouteManager routeManager = new RouteManager(); //Opening the RouteManager need some future work
+        private TemplateManager templateManager = new DefaultTemplateManager();
         
         public void setSessionManager(SessionManager sessionManager) {
             this.sessionManager = sessionManager;
+        }
+        
+        public void setTemplateManager(TemplateManager templateManager) {
+            this.templateManager = templateManager;
         }
         
         public Server build() {

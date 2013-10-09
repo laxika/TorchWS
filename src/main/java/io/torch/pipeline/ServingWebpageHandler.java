@@ -32,8 +32,6 @@ import java.util.Map;
 
 public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
-    protected static TemplateManager templateManager = new TemplateManager();
-
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         FullHttpRequest request = (FullHttpRequest) msg;
@@ -63,6 +61,7 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
             webpage.handle(torchreq, response, session);
 
+            TemplateManager templateManager = (TemplateManager) ctx.channel().attr(ChannelVariable.TEMPLATE_MANAGER.getVariableKey()).get();
             FullHttpResponse fullresponse;
             if (response.getStatus() instanceof ServerErrorResponseStatus || response.getStatus() instanceof ClientErrorResponseStatus) {
                 if (templateManager.isTemplateExist("error/" + response.getStatus().getStatusCode() + ".tpl")) {
