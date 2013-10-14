@@ -14,6 +14,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.ServerCookieEncoder;
 import io.netty.util.CharsetUtil;
+import io.torch.controller.Validable;
 import io.torch.controller.WebPage;
 import io.torch.cookie.CookieVariable;
 import io.torch.http.request.RequestMethod;
@@ -45,7 +46,7 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
             //Calculating the actual session, if no session data recived, start a new one
             CookieVariable sessionCookie = torchreq.getCookieData().getCookie("SESSID");
-            
+
             SessionManager sessionManager = (SessionManager) ctx.channel().attr(ChannelVariable.SESSION_MANAGER.getVariableKey()).get();
 
             Session session;
@@ -58,6 +59,27 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
             //Instantiate a new WebPage object and handle the request
             WebPage webpage = route.getTarget().newInstance();
+
+            if (webpage instanceof Validable) {
+                if (!((Validable) webpage).validate(torchreq, response, session)) {
+                    //TODO: somehopw handle all error response on the same way.
+                    
+                    FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(ClientErrorResponseStatus.BAD_REQUEST.getStatusCode()), Unpooled.copiedBuffer("400 Bad Request!", CharsetUtil.UTF_8));
+
+                    if (HttpHeaders.isKeepAlive(request)) {
+                        // Add 'Content-Length' header only for a keep-alive connection.
+                        fullresponse.headers().set(Names.CONTENT_LENGTH, fullresponse.content().readableBytes());
+                        // Add keep alive header as per:
+                        // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
+                        fullresponse.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+                    }
+
+                    fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/html; charset=UTF-8");
+
+                    ctx.write(fullresponse);
+                    ctx.flush();
+                }
+            }
 
             webpage.handle(torchreq, response, session);
 
