@@ -30,7 +30,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import org.apache.commons.io.FilenameUtils;
 
-public class ServingFileHandler extends ChannelInboundHandlerAdapter {
+public class ServingFileHandler extends WebResponseHandler {
 
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
@@ -52,15 +52,11 @@ public class ServingFileHandler extends ChannelInboundHandlerAdapter {
             if (!requestPath.startsWith(PUBLIC_PATH)) {
                 //Send back not found 404
                 sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, request);
-                ctx.flush();
-                request.release();
                 return;
             }
         } catch (IOException e) {
-        	// If something went wrong we're better off just denying it
+            // If something went wrong we're better off just denying it
             sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, request);
-            ctx.flush();
-            request.release();
             return;
         }
 
@@ -87,7 +83,6 @@ public class ServingFileHandler extends ChannelInboundHandlerAdapter {
                 raf = new RandomAccessFile(file, "r");
             } catch (FileNotFoundException fnfe) {
                 sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, request);
-                request.release();
                 return;
             }
             long fileLength = raf.length();
@@ -117,28 +112,11 @@ public class ServingFileHandler extends ChannelInboundHandlerAdapter {
         } else {
             //Send back not found 404
             sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, request);
+            return;
         }
 
         ctx.flush();
         request.release();
-    }
-
-    private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status, FullHttpRequest request) {
-        FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer("404 Not found!", CharsetUtil.UTF_8));
-
-
-        if (HttpHeaders.isKeepAlive(request)) {
-            // Add 'Content-Length' header only for a keep-alive connection.
-            fullresponse.headers().set(Names.CONTENT_LENGTH, fullresponse.content().readableBytes());
-            // Add keep alive header as per:
-            // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
-            fullresponse.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-        }
-
-        fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/html; charset=UTF-8");
-
-        ctx.write(fullresponse);
-        ctx.flush();
     }
 
     /**

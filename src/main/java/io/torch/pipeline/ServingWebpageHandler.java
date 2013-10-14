@@ -31,7 +31,7 @@ import io.torch.template.Templateable;
 import io.torch.util.ChannelVariable;
 import java.util.Map;
 
-public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
+public class ServingWebpageHandler extends WebResponseHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -62,22 +62,8 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
 
             if (webpage instanceof Validable) {
                 if (!((Validable) webpage).validate(torchreq, response, session)) {
-                    //TODO: somehopw handle all error response on the same way.
-                    
-                    FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(ClientErrorResponseStatus.BAD_REQUEST.getStatusCode()), Unpooled.copiedBuffer("400 Bad Request!", CharsetUtil.UTF_8));
-
-                    if (HttpHeaders.isKeepAlive(request)) {
-                        // Add 'Content-Length' header only for a keep-alive connection.
-                        fullresponse.headers().set(Names.CONTENT_LENGTH, fullresponse.content().readableBytes());
-                        // Add keep alive header as per:
-                        // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
-                        fullresponse.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-                    }
-
-                    fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/html; charset=UTF-8");
-
-                    ctx.write(fullresponse);
-                    ctx.flush();
+                    sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, request);
+                    return;
                 }
             }
 
@@ -102,13 +88,7 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
                 }
             }
 
-            if (HttpHeaders.isKeepAlive(request)) {
-                // Add 'Content-Length' header only for a keep-alive connection.
-                fullresponse.headers().set(Names.CONTENT_LENGTH, fullresponse.content().readableBytes());
-                // Add keep alive header as per:
-                // - http://www.w3.org/Protocols/HTTP/1.1/draft-ietf-http-v11-spec-01.html#Connection
-                fullresponse.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-            }
+            handleKeepAliveHeader(request, fullresponse);
 
             fullresponse.headers().set(Names.CONTENT_TYPE, response.getContentType());
 
@@ -147,11 +127,5 @@ public class ServingWebpageHandler extends ChannelInboundHandlerAdapter {
         RouteManager routeManager = (RouteManager) ctx.channel().attr(ChannelVariable.ROUTE_MANAGER.getVariableKey()).get();
 
         return routeManager.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
-        ctx.close();
     }
 }
