@@ -36,8 +36,6 @@ public class ServingWebpageHandler extends WebResponseHandler {
     private final TemplateRootLocator templateRootLocator;
     
     public ServingWebpageHandler() {
-        super();
-        
         templateRootLocator = new TemplateRootLocator();
     }
 
@@ -75,7 +73,9 @@ public class ServingWebpageHandler extends WebResponseHandler {
                 }
             }
 
-            webpage.handle(torchreq, response, session);
+            synchronized(session) {
+                webpage.handle(torchreq, response, session);
+            }
 
             TemplateManager templateManager = (TemplateManager) ctx.channel().attr(ChannelVariable.TEMPLATE_MANAGER.getVariableKey()).get();
             FullHttpResponse fullresponse;
