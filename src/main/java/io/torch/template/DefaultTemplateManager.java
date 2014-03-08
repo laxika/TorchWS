@@ -11,7 +11,7 @@ import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class DefaultTemplateManager implements TemplateManager{
+public class DefaultTemplateManager implements TemplateManager {
 
     Configuration cfg = new Configuration();
 

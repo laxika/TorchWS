@@ -4,6 +4,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.torch.route.DefaultRouteManager;
 import io.torch.route.RouteManager;
 import io.torch.session.DefaultSessionManager;
 import io.torch.session.SessionManager;
@@ -87,7 +88,7 @@ public final class Server {
      */
     public static class Builder {
         private SessionManager sessionManager = new DefaultSessionManager();
-        private RouteManager routeManager = new RouteManager(); //Opening the RouteManager need some future work
+        private RouteManager routeManager = new DefaultRouteManager();
         private TemplateManager templateManager = new DefaultTemplateManager();
         
         public void setSessionManager(SessionManager sessionManager) {
@@ -96,6 +97,10 @@ public final class Server {
         
         public void setTemplateManager(TemplateManager templateManager) {
             this.templateManager = templateManager;
+        }
+        
+        public void setRouteManager(RouteManager routeManager) {
+            this.routeManager = routeManager;
         }
         
         public Server build() {

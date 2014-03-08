@@ -4,6 +4,8 @@ import io.torch.example.routing.HelloWorldExactRoute;
 import io.torch.example.routing.HelloWorldWithOneVar;
 import io.torch.example.routing.HelloWorldWithTwoVar;
 import io.torch.http.request.RequestMethod;
+import io.torch.route.DefaultRouteManager;
+import io.torch.route.DefaultRouteTarget;
 import io.torch.route.RouteManager;
 import io.torch.route.RouteTarget;
 import io.torch.test.page.TestRouteWithDependency;
@@ -18,7 +20,7 @@ public class RouteManagerTest {
 
     @BeforeMethod
     public void setUpMethod() throws Exception {
-        testTarget = new RouteManager();
+        testTarget = new DefaultRouteManager();
     }
 
     @Test
@@ -44,7 +46,7 @@ public class RouteManagerTest {
         testTarget.defineRoute("/hello/@variable/@variable2/", HelloWorldWithTwoVar.class);
         testTarget.defineRoute("/hello/@variable/lol/", HelloWorldWithOneVar.class);
         testTarget.defineRoute("/hello/exact/route", HelloWorldExactRoute.class);
-        testTarget.defineRoute("/hello/some/post/route", HelloWorldExactRoute.class, RouteTarget.NO_DEPENDENCY, RequestMethod.POST);
+        testTarget.defineRoute("/hello/some/post/route", HelloWorldExactRoute.class, DefaultRouteTarget.NO_DEPENDENCY, RequestMethod.POST);
 
         assert testTarget.calculateRouteByUrl("/", RequestMethod.GET).getTarget().newInstance() instanceof HelloWorldWithTwoVar : "Priority test 0";
         assert testTarget.calculateRouteByUrl("/hello/exact/route", RequestMethod.GET).getTarget().newInstance() instanceof HelloWorldExactRoute : "Priority test 1";
@@ -82,7 +84,7 @@ public class RouteManagerTest {
     
     @Test
     public void testRouteEnums() throws Exception {
-        testTarget.defineRoute("/hello/some/post/route", HelloWorldExactRoute.class, RouteTarget.NO_DEPENDENCY, EnumSet.of(RequestMethod.POST, RequestMethod.GET));
+        testTarget.defineRoute("/hello/some/post/route", HelloWorldExactRoute.class, DefaultRouteTarget.NO_DEPENDENCY, EnumSet.of(RequestMethod.POST, RequestMethod.GET));
         
         assert testTarget.calculateRouteByUrl("/hello/some/post/route", RequestMethod.GET).getTarget().newInstance() instanceof HelloWorldExactRoute : "Enum test 1";
         assert testTarget.calculateRouteByUrl("/hello/some/post/route", RequestMethod.POST).getTarget().newInstance() instanceof HelloWorldExactRoute : "Enum test 2";
