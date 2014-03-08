@@ -6,10 +6,12 @@ import io.torch.http.request.TorchHttpRequest;
 import io.torch.http.response.TorchHttpResponse;
 import io.torch.session.Session;
 import io.torch.template.Templateable;
+import io.torch.template.TemplateRoot;
 
-public class IndexPage extends WebPage implements Templateable {
+@Templateable(path="example/login/index.tpl")
+public class IndexPage extends WebPage {
     
-    private IndexData indexData;
+    private @TemplateRoot IndexData indexData;
 
     @Override
     public void handle(TorchHttpRequest request, TorchHttpResponse response, Session session) {
@@ -18,15 +20,5 @@ public class IndexPage extends WebPage implements Templateable {
         if(session.isSessionVariableSet("userid")) {
             indexData.setUsername("admin"); //query the real username from the db here
         }
-    }
-
-    @Override
-    public String getTemplate() {
-        return "example/login/index.tpl";
-    }
-
-    @Override
-    public Object getTemplateRoot() {
-        return indexData;
     }
 }

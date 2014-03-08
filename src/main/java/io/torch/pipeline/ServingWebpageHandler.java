@@ -3,7 +3,6 @@ package io.torch.pipeline;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.DefaultCookie;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -27,11 +26,20 @@ import io.torch.route.RouteManager;
 import io.torch.session.Session;
 import io.torch.session.SessionManager;
 import io.torch.template.TemplateManager;
+import io.torch.template.TemplateRootLocator;
 import io.torch.template.Templateable;
 import io.torch.util.ChannelVariable;
 import java.util.Map;
 
 public class ServingWebpageHandler extends WebResponseHandler {
+    
+    private final TemplateRootLocator templateRootLocator;
+    
+    public ServingWebpageHandler() {
+        super();
+        
+        templateRootLocator = new TemplateRootLocator();
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -79,10 +87,8 @@ public class ServingWebpageHandler extends WebResponseHandler {
                 }
             } else {
                 //Generate the template
-                if (webpage instanceof Templateable && ((Templateable) webpage).getTemplate() != null) {
-                    Templateable templateableWebpage = (Templateable) webpage;
-
-                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate(templateableWebpage.getTemplate(), templateableWebpage.getTemplateRoot()), CharsetUtil.UTF_8));
+                if (webpage.getClass().isAnnotationPresent(Templateable.class)) {
+                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate(webpage.getClass().getAnnotation(Templateable.class).path(), templateRootLocator.locateTemplateRoot(webpage).get(webpage)), CharsetUtil.UTF_8));
                 } else {
                     fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
                 }
