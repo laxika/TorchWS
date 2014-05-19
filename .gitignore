@@ -5,3 +5,4 @@ manifest.mf
 /dist/
 /target/
 nb-configuration.xml
+nbactions.xml
