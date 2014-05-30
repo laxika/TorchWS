@@ -11,6 +11,8 @@ import io.torch.http.response.TorchHttpResponse;
 import io.torch.route.Route;
 import io.torch.route.RouteManager;
 import io.torch.util.ChannelVariable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ServingRequestHandler extends ChannelInboundHandlerAdapter {
 
@@ -48,7 +50,8 @@ public class ServingRequestHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
+        Logger.getLogger(ServingRequestHandler.class.getName()).log(Level.WARNING, null, cause);
+        
         ctx.close();
     }
 }
