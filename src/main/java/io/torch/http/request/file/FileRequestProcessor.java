@@ -46,72 +46,66 @@ public class FileRequestProcessor extends RequestProcessor {
     public void processRequest(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse) {
         File file = new File(PUBLIC_FOLDER, torchRequest.getUri());
 
-        if(!this.validatePath(file)) {
+        if (!this.validatePath(file) || !file.exists() || !file.isFile()) {
             sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
-            
+
             return;
         }
-
-        if (file.exists() && file.isFile()) {
-            try {
-                // Cache Validation
-                HeaderVariable ifModifiedSince = torchRequest.getHeaderData().getHeader(HttpHeaders.Names.IF_MODIFIED_SINCE);
-                if (ifModifiedSince != null) {
-                    try {
-                        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-                        Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince.getValue());
-
-                        // Only compare up to the second because the datetime format we send to the client
-                        // does not have milliseconds
-                        long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
-                        long fileLastModifiedSeconds = file.lastModified() / 1000;
-                        if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-                            sendNotModified(ctx);
-                            return;
-                        }
-                    } catch (ParseException ex) {
-                        Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-                RandomAccessFile raf;
+        
+        try {
+            // Cache Validation
+            HeaderVariable ifModifiedSince = torchRequest.getHeaderData().getHeader(HttpHeaders.Names.IF_MODIFIED_SINCE);
+            if (ifModifiedSince != null) {
                 try {
-                    raf = new RandomAccessFile(file, "r");
-                } catch (FileNotFoundException fnfe) {
-                    sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
-                    return;
+                    SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
+                    Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince.getValue());
+
+                    // Only compare up to the second because the datetime format we send to the client
+                    // does not have milliseconds
+                    long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
+                    long fileLastModifiedSeconds = file.lastModified() / 1000;
+                    if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
+                        sendNotModified(ctx);
+                        return;
+                    }
+                } catch (ParseException ex) {
+                    Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                long fileLength = raf.length();
-
-                HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-                HttpHeaders.setContentLength(response, fileLength);
-                setContentTypeHeader(response, file);
-                setDateAndCacheHeaders(response, file);
-
-                if (torchRequest.isKeepAlive()) {
-                    response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-                }
-
-                // Write the initial line and the header.
-                ctx.write(response);
-
-                ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
-
-                // Write the end marker
-                ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
-
-                // Decide whether to close the connection or not.
-                if (!torchRequest.isKeepAlive()) {
-                    // Close the connection when the whole content is written out.
-                    lastContentFuture.addListener(ChannelFutureListener.CLOSE);
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else {
-            //Send back not found 404
-            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
-            return;
+
+            RandomAccessFile raf;
+            try {
+                raf = new RandomAccessFile(file, "r");
+            } catch (FileNotFoundException fnfe) {
+                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
+                return;
+            }
+            long fileLength = raf.length();
+
+            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+            HttpHeaders.setContentLength(response, fileLength);
+            setContentTypeHeader(response, file);
+            setDateAndCacheHeaders(response, file);
+
+            if (torchRequest.isKeepAlive()) {
+                response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+            }
+
+            // Write the initial line and the header.
+            ctx.write(response);
+
+            ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
+
+            // Write the end marker
+            ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+
+            // Decide whether to close the connection or not.
+            if (!torchRequest.isKeepAlive()) {
+                // Close the connection when the whole content is written out.
+                lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         ctx.flush();
@@ -174,11 +168,11 @@ public class FileRequestProcessor extends RequestProcessor {
     private static void setContentTypeHeader(HttpResponse response, File file) throws IOException {
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, mimeDetector.getMimeByExtension(FilenameUtils.getExtension(file.getName())));
     }
-    
+
     private boolean validatePath(File file) {
         try {
             String requestPath = file.getCanonicalPath();
-            
+
             if (!requestPath.startsWith(PUBLIC_PATH)) {
                 return false;
             }
@@ -186,7 +180,7 @@ public class FileRequestProcessor extends RequestProcessor {
             Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
-        
+
         return true;
     }
 
