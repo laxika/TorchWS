@@ -70,22 +70,7 @@ public class WebpageRequestProcessor extends RequestProcessor {
                 webpage.handle(torchRequest, torchResponse, session);
             }
 
-            TemplateManager templateManager = (TemplateManager) ctx.channel().attr(ChannelVariable.TEMPLATE_MANAGER.getVariableKey()).get();
-            FullHttpResponse fullresponse;
-            if (torchResponse.getStatus() instanceof ServerErrorResponseStatus || torchResponse.getStatus() instanceof ClientErrorResponseStatus) {
-                if (templateManager.isTemplateExist("error/" + torchResponse.getStatus().getStatusCode() + ".tpl")) {
-                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate("error/" + torchResponse.getStatus().getStatusCode() + ".tpl", null), CharsetUtil.UTF_8));
-                } else {
-                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer("Error " + torchResponse.getStatus().getStatusCode(), CharsetUtil.UTF_8));
-                }
-            } else {
-                //Generate the template
-                if (webpage.getClass().isAnnotationPresent(Templateable.class)) {
-                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate(webpage.getClass().getAnnotation(Templateable.class).path(), templateRootLocator.locateTemplateRoot(webpage)), CharsetUtil.UTF_8));
-                } else {
-                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer(torchResponse.getContent(), CharsetUtil.UTF_8));
-                }
-            }
+            FullHttpResponse fullresponse = this.processTemplate(ctx, torchResponse, webpage);
 
             handleKeepAliveHeader(torchRequest, fullresponse);
 
@@ -121,6 +106,28 @@ public class WebpageRequestProcessor extends RequestProcessor {
             // If something went wrong we're better off just denying it
             sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, torchRequest);
         }
+    }
+
+    private FullHttpResponse processTemplate(ChannelHandlerContext ctx, TorchHttpResponse torchResponse, WebPage webpage) throws IOException, TemplateException, IllegalArgumentException, IllegalAccessException {
+        TemplateManager templateManager = (TemplateManager) ctx.channel().attr(ChannelVariable.TEMPLATE_MANAGER.getVariableKey()).get();
+        FullHttpResponse fullresponse;
+
+        if (torchResponse.getStatus() instanceof ServerErrorResponseStatus || torchResponse.getStatus() instanceof ClientErrorResponseStatus) {
+            if (templateManager.isTemplateExist("error/" + torchResponse.getStatus().getStatusCode() + ".tpl")) {
+                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate("error/" + torchResponse.getStatus().getStatusCode() + ".tpl", null), CharsetUtil.UTF_8));
+            } else {
+                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer("Error " + torchResponse.getStatus().getStatusCode(), CharsetUtil.UTF_8));
+            }
+        } else {
+            //Generate the template
+            if (webpage.getClass().isAnnotationPresent(Templateable.class)) {
+                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate(webpage.getClass().getAnnotation(Templateable.class).path(), templateRootLocator.locateTemplateRoot(webpage)), CharsetUtil.UTF_8));
+            } else {
+                fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer(torchResponse.getContent(), CharsetUtil.UTF_8));
+            }
+        }
+
+        return fullresponse;
     }
 
 }
