@@ -41,6 +41,12 @@ public class FileRequestProcessor extends RequestProcessor {
 
     private static final File PUBLIC_FOLDER = new File("public");
     private static final String PUBLIC_PATH = PUBLIC_FOLDER.getAbsolutePath();
+    
+    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
+    
+    static {
+        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
+    }
 
     @Override
     public void processRequest(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse) {
@@ -55,9 +61,9 @@ public class FileRequestProcessor extends RequestProcessor {
         try {
             // Cache Validation
             HeaderVariable ifModifiedSince = torchRequest.getHeaderData().getHeader(HttpHeaders.Names.IF_MODIFIED_SINCE);
+            
             if (ifModifiedSince != null) {
                 try {
-                    SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
                     Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince.getValue());
 
                     // Only compare up to the second because the datetime format we send to the client
@@ -119,6 +125,7 @@ public class FileRequestProcessor extends RequestProcessor {
      */
     private static void sendNotModified(ChannelHandlerContext ctx) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED);
+        
         setDateHeader(response);
 
         // Close the connection as soon as the error message is sent.
@@ -131,11 +138,7 @@ public class FileRequestProcessor extends RequestProcessor {
      * @param response HTTP response
      */
     private static void setDateHeader(FullHttpResponse response) {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
-
-        Calendar time = new GregorianCalendar();
-        response.headers().set(HttpHeaders.Names.DATE, dateFormatter.format(time.getTime()));
+        response.headers().set(HttpHeaders.Names.DATE, dateFormatter.format(new Date(System.currentTimeMillis())));
     }
 
     /**
@@ -145,16 +148,8 @@ public class FileRequestProcessor extends RequestProcessor {
      * @param fileToCache file to extract content type
      */
     private static void setDateAndCacheHeaders(HttpResponse response, File fileToCache) {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-        dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
-
-        // Date header
-        Calendar time = new GregorianCalendar();
-        response.headers().set(HttpHeaders.Names.DATE, dateFormatter.format(time.getTime()));
-
-        // Add cache headers
-        time.add(Calendar.SECOND, HTTP_CACHE_SECONDS);
-        response.headers().set(HttpHeaders.Names.EXPIRES, dateFormatter.format(time.getTime()));
+        response.headers().set(HttpHeaders.Names.DATE, dateFormatter.format(new Date(System.currentTimeMillis())));
+        response.headers().set(HttpHeaders.Names.EXPIRES, dateFormatter.format(new Date(System.currentTimeMillis() + (HTTP_CACHE_SECONDS * 1000))));
         response.headers().set(HttpHeaders.Names.CACHE_CONTROL, "private, max-age=" + HTTP_CACHE_SECONDS);
         response.headers().set(HttpHeaders.Names.LAST_MODIFIED, dateFormatter.format(new Date(fileToCache.lastModified())));
     }
