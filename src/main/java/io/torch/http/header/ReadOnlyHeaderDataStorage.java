@@ -13,7 +13,7 @@ public class ReadOnlyHeaderDataStorage implements Iterable<HeaderVariable> {
     private final HashMap<String, HeaderVariable> headerStorage = new HashMap<>();
 
     public ReadOnlyHeaderDataStorage(HttpHeaders headers) {
-        for(Entry<String, String> header: headers) {
+        for (Entry<String, String> header : headers) {
             headerStorage.put(header.getKey(), new HeaderVariable(header.getKey(), header.getValue()));
         }
     }

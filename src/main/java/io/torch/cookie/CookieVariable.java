@@ -11,7 +11,7 @@ public class CookieVariable {
 
     /**
      * Create a new CookieVariable on the domain level.
-     * 
+     *
      * @param name the name of the cookie
      * @param value the value of the cookie
      */
@@ -21,7 +21,7 @@ public class CookieVariable {
 
     /**
      * Create a new CookieVariable on the given path level.
-     * 
+     *
      * @param name the name of the cookie
      * @param value the value of the cookie
      * @param path the path where the cookie is set
@@ -34,7 +34,7 @@ public class CookieVariable {
 
     /**
      * Return the name of the cookie.
-     * 
+     *
      * @return the name of the cookie.
      */
     public String getName() {
@@ -43,16 +43,16 @@ public class CookieVariable {
 
     /**
      * Return the value of the cookie.
-     * 
+     *
      * @return the value of the cookie.
      */
     public String getValue() {
         return value;
     }
-    
+
     /**
      * Return the path of the cookie. Return null if it's a domain wide cookie.
-     * 
+     *
      * @return the path of the cookie.
      */
     public String getPath() {
@@ -61,7 +61,7 @@ public class CookieVariable {
 
     /**
      * Return the value of the cookie.
-     * 
+     *
      * @return the value of the cookie.
      */
     @Override

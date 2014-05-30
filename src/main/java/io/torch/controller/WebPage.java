@@ -11,7 +11,7 @@ public abstract class WebPage {
 
     /**
      * This method is called to handle the request. You can manipulate the response in this method.
-     * 
+     *
      * @param request the HTTP request
      * @param response the HTTP response
      * @param session the user's session

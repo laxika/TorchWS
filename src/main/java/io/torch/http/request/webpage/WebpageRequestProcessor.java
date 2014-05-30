@@ -1,14 +1,13 @@
-package io.torch.pipeline;
+package io.torch.http.request.webpage;
 
+import freemarker.template.TemplateException;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultCookie;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpHeaders.Names;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.ServerCookieEncoder;
@@ -16,40 +15,34 @@ import io.netty.util.CharsetUtil;
 import io.torch.controller.Validable;
 import io.torch.controller.WebPage;
 import io.torch.cookie.CookieVariable;
-import io.torch.http.request.RequestMethod;
+import io.torch.http.request.RequestProcessor;
 import io.torch.http.request.TorchHttpRequest;
 import io.torch.http.response.TorchHttpResponse;
 import io.torch.http.response.status.ClientErrorResponseStatus;
 import io.torch.http.response.status.ServerErrorResponseStatus;
-import io.torch.route.Route;
-import io.torch.route.RouteManager;
 import io.torch.session.Session;
 import io.torch.session.SessionManager;
 import io.torch.template.TemplateManager;
 import io.torch.template.TemplateRootLocator;
 import io.torch.template.Templateable;
 import io.torch.util.ChannelVariable;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class ServingWebpageHandler extends WebResponseHandler {
-    
+public class WebpageRequestProcessor extends RequestProcessor {
+
     private final TemplateRootLocator templateRootLocator;
-    
-    public ServingWebpageHandler() {
+
+    public WebpageRequestProcessor() {
         templateRootLocator = new TemplateRootLocator();
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        FullHttpRequest request = (FullHttpRequest) msg;
-
-        Route route = calculateRouteFromRequest(ctx, request);
-
-        //Check that we the target of the route
-        if (route != null) {
-            TorchHttpResponse response = new TorchHttpResponse();
-            TorchHttpRequest torchreq = new TorchHttpRequest(request, route);
-
+    public void processRequest(ChannelHandlerContext ctx, TorchHttpRequest torchreq, TorchHttpResponse response) {
+        try {
             //Calculating the actual session, if no session data recived, start a new one
             CookieVariable sessionCookie = torchreq.getCookieData().getCookie("SESSID");
 
@@ -64,16 +57,16 @@ public class ServingWebpageHandler extends WebResponseHandler {
             }
 
             //Instantiate a new WebPage object and handle the request
-            WebPage webpage = route.getTarget().newInstance();
+            WebPage webpage = torchreq.getRoute().getTarget().newInstance();
 
             if (webpage instanceof Validable) {
                 if (!((Validable) webpage).validate(torchreq, response, session)) {
-                    sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, request);
+                    sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, torchreq);
                     return;
                 }
             }
 
-            synchronized(session) {
+            synchronized (session) {
                 webpage.handle(torchreq, response, session);
             }
 
@@ -94,9 +87,9 @@ public class ServingWebpageHandler extends WebResponseHandler {
                 }
             }
 
-            handleKeepAliveHeader(request, fullresponse);
+            handleKeepAliveHeader(torchreq, fullresponse);
 
-            fullresponse.headers().set(Names.CONTENT_TYPE, response.getContentType());
+            fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, response.getContentType());
 
             //Setting the new cookies
             for (CookieVariable cookie : response.getCookieData()) {
@@ -105,7 +98,7 @@ public class ServingWebpageHandler extends WebResponseHandler {
                 if (cookie.getPath() != null) {
                     realCookie.setPath(cookie.getPath());
                 }
-                fullresponse.headers().set(Names.SET_COOKIE, ServerCookieEncoder.encode(realCookie));
+                fullresponse.headers().set(HttpHeaders.Names.SET_COOKIE, ServerCookieEncoder.encode(realCookie));
             }
 
             //Setting the headers
@@ -116,22 +109,18 @@ public class ServingWebpageHandler extends WebResponseHandler {
             }
 
             // Write the response.
-            if (!HttpHeaders.isKeepAlive(request)) {
+            if (!torchreq.isKeepAlive()) {
                 ctx.write(fullresponse).addListener(ChannelFutureListener.CLOSE);
             } else {
                 ctx.write(fullresponse);
             }
             ctx.flush();
-            request.release();
-        } else {
-            //Forward the message to the file handler to server a static asset
-            ctx.fireChannelRead(msg);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException | TemplateException ex) {
+            Logger.getLogger(WebpageRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
+
+            // If something went wrong we're better off just denying it
+            sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, torchreq);
         }
     }
 
-    private Route calculateRouteFromRequest(ChannelHandlerContext ctx, FullHttpRequest request) {
-        RouteManager routeManager = (RouteManager) ctx.channel().attr(ChannelVariable.ROUTE_MANAGER.getVariableKey()).get();
-
-        return routeManager.calculateRouteByUrl(request.getUri(), RequestMethod.getMethodByNettyMethod(request.getMethod()));
-    }
 }

@@ -11,7 +11,7 @@ public class LogoutPage extends WebPage {
     public void handle(TorchHttpRequest request, TorchHttpResponse response, Session session) {
         //Remove the user session
         session.clearSessionVariables();
-        
+
         //Redirect the user
         response.redirect("/");
     }

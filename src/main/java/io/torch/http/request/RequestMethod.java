@@ -5,14 +5,14 @@ import io.netty.handler.codec.http.HttpMethod;
 public enum RequestMethod {
 
     GET, POST, PUT, DELETE;
-    
+
     public static RequestMethod getMethodByNettyMethod(HttpMethod method) {
-        switch(method.name()) {
+        switch (method.name()) {
             case "POST":
                 return POST;
             case "DELETE":
                 return DELETE;
-            case "PUT": 
+            case "PUT":
                 return PUT;
             default:
                 return GET;

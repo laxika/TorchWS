@@ -1,4 +1,3 @@
-
 package io.torch.example.template;
 
 import io.torch.Server;

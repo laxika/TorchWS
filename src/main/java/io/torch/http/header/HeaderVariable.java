@@ -1,4 +1,3 @@
-
 package io.torch.http.header;
 
 /**
@@ -11,7 +10,7 @@ public class HeaderVariable {
 
     /**
      * Create a new HeaderVariable.
-     * 
+     *
      * @param headerName the name of the header variable
      * @param headerValue the value of the header variable
      */
@@ -22,7 +21,7 @@ public class HeaderVariable {
 
     /**
      * Return the name of the header variable.
-     * 
+     *
      * @return the name of the header variable.
      */
     public String getName() {
@@ -31,7 +30,7 @@ public class HeaderVariable {
 
     /**
      * Return the value of the header variable.
-     * 
+     *
      * @return the value of the header variable.
      */
     public String getValue() {
@@ -40,7 +39,7 @@ public class HeaderVariable {
 
     /**
      * Return the name of the header variable.
-     * 
+     *
      * @return the name of the header variable.
      */
     @Override

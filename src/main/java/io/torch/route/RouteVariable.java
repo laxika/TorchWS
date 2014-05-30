@@ -9,15 +9,15 @@ public class RouteVariable {
         this.variableName = variableName;
         this.variableValue = variableValue;
     }
-    
+
     public String getName() {
         return variableName;
     }
-    
+
     public String getValue() {
         return variableValue;
     }
-    
+
     @Override
     public String toString() {
         return variableValue;

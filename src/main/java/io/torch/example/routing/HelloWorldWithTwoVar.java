@@ -14,7 +14,7 @@ public class HelloWorldWithTwoVar extends WebPage {
         response.appendContent("<br><br>Route variables listened here to show how to use the iterator with them:<br><br>");
 
         for (RouteVariable routeVar : request.getRouteData()) {
-            response.appendContent("Route var: <b>" + routeVar.getName() + "</b> = '" + routeVar.getValue()+"'<br>");
+            response.appendContent("Route var: <b>" + routeVar.getName() + "</b> = '" + routeVar.getValue() + "'<br>");
         }
     }
 }

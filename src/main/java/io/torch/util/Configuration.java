@@ -13,7 +13,7 @@ import org.apache.commons.configuration.XMLConfiguration;
 public class Configuration extends CompositeConfiguration {
 
     public Configuration() {
-        
+
         //Load the configuration from file
         XMLConfiguration xmlConf = null;
 

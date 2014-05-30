@@ -1,4 +1,3 @@
-
 package io.torch.route;
 
 import io.torch.controller.WebPage;
@@ -85,7 +84,7 @@ public class DefaultRoute implements Route {
 
         return result;
     }
-    
+
     @Override
     public int hashCode() {
         int hash = 5;

@@ -37,10 +37,10 @@ public final class Server {
      */
     public Server(int port) {
         this(new Builder());
-        
+
         config.setProperty("listener.port", port);
     }
-    
+
     private Server(Builder builder) {
         this.sessionManager = builder.sessionManager;
         this.routeManager = builder.routeManager;
@@ -82,27 +82,28 @@ public final class Server {
     public RouteManager getRouteManager() {
         return routeManager;
     }
-    
+
     /**
      * Use this class to build a new server instance with custom session/route etc... managers.
      */
     public static class Builder {
+
         private SessionManager sessionManager = new DefaultSessionManager();
         private RouteManager routeManager = new DefaultRouteManager();
         private TemplateManager templateManager = new DefaultTemplateManager();
-        
+
         public void setSessionManager(SessionManager sessionManager) {
             this.sessionManager = sessionManager;
         }
-        
+
         public void setTemplateManager(TemplateManager templateManager) {
             this.templateManager = templateManager;
         }
-        
+
         public void setRouteManager(RouteManager routeManager) {
             this.routeManager = routeManager;
         }
-        
+
         public Server build() {
             return new Server(this);
         }

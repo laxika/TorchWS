@@ -55,7 +55,7 @@ public class DefaultRouteManager implements RouteManager {
      */
     @Override
     public void defineRoute(String route, Class<? extends WebPage> target, Object[] dependency, EnumSet<RequestMethod> methods) throws NoSuchConstructorException {
-        for(RequestMethod method : methods) {
+        for (RequestMethod method : methods) {
             defineRoute(route, target, dependency, method);
         }
     }

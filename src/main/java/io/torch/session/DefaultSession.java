@@ -34,7 +34,7 @@ public class DefaultSession implements Session {
     public boolean isSessionVariableSet(String name) {
         return sessionVariables.containsKey(name);
     }
-    
+
     @Override
     public void clearSessionVariables() {
         sessionVariables.clear();

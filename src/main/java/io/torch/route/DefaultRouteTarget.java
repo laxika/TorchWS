@@ -16,16 +16,16 @@ public class DefaultRouteTarget implements RouteTarget {
         if (target == null || dependency == null) {
             throw new IllegalArgumentException();
         }
-        
+
         this.dependencyObjectList = dependency;
-        
+
         //Calculate the classes of the depedencies
         Class[] dependencyClassList = new Class[dependencyObjectList.length];
 
         for (int i = 0; i < dependencyObjectList.length; i++) {
             dependencyClassList[i] = dependencyObjectList[i].getClass();
-            
-            if(dependencyClassList[i].isMemberClass() && !Modifier.isPublic(dependencyClassList[i].getModifiers())) {
+
+            if (dependencyClassList[i].isMemberClass() && !Modifier.isPublic(dependencyClassList[i].getModifiers())) {
                 dependencyClassList[i] = dependencyClassList[i].getSuperclass();
             }
         }
@@ -37,7 +37,7 @@ public class DefaultRouteTarget implements RouteTarget {
             throw new NoSuchConstructorException("No such constructor in " + e.getMessage());
         }
     }
-    
+
     public WebPage newInstance() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         return (WebPage) constructor.newInstance(dependencyObjectList);
     }

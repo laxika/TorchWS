@@ -7,11 +7,11 @@ public class ArrayUtils {
 
     /**
      * Calculate the intersection of two list.
-     * 
+     *
      * @param <T>
      * @param list1
      * @param list2
-     * @return 
+     * @return
      */
     public static <T> List<T> intersection(List<T> list1, List<T> list2) {
         List<T> list = new ArrayList<>();

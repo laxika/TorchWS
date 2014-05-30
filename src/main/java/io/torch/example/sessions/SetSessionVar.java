@@ -11,5 +11,5 @@ public class SetSessionVar extends WebPage {
     public void handle(TorchHttpRequest request, TorchHttpResponse response, Session session) {
         session.setSessionVariable("testvar", "XYZ smthing");
     }
-    
+
 }

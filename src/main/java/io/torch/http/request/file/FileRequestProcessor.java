@@ -1,122 +1,129 @@
-package io.torch.pipeline;
+package io.torch.http.request.file;
 
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.DefaultFileRegion;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpHeaders.Names;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
-import io.netty.util.CharsetUtil;
 import io.torch.file.MimeTypeDetector;
+import io.torch.http.header.HeaderVariable;
+import io.torch.http.request.RequestProcessor;
+import io.torch.http.request.TorchHttpRequest;
+import io.torch.http.response.TorchHttpResponse;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 
-public class ServingFileHandler extends WebResponseHandler {
+public class FileRequestProcessor extends RequestProcessor {
 
     public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
     public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
     public static final int HTTP_CACHE_SECONDS = 60;
-    private static final MimeTypeDetector mimeDetector= new MimeTypeDetector();
-    
+    private static final MimeTypeDetector mimeDetector = new MimeTypeDetector();
+
     private static final File PUBLIC_FOLDER = new File("public");
     private static final String PUBLIC_PATH = PUBLIC_FOLDER.getAbsolutePath();
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        FullHttpRequest request = (FullHttpRequest) msg;
+    public void processRequest(ChannelHandlerContext ctx, TorchHttpRequest torchreq, TorchHttpResponse torchresponse) {
+        File file = new File(PUBLIC_FOLDER, torchreq.getUri());
 
-        File file = new File(PUBLIC_FOLDER, request.getUri());
-        
         // Validate path
         try {
             String requestPath = file.getCanonicalPath();
             if (!requestPath.startsWith(PUBLIC_PATH)) {
                 //Send back not found 404
-                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, request);
+                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchreq);
                 return;
             }
         } catch (IOException e) {
             // If something went wrong we're better off just denying it
-            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, request);
+            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchreq);
             return;
         }
 
         if (file.exists() && file.isFile()) {
-            // Cache Validation
-            String ifModifiedSince = request.headers().get(Names.IF_MODIFIED_SINCE);
-            if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
-                SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-                Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince);
+            try {
+                // Cache Validation
+                HeaderVariable ifModifiedSince = torchreq.getHeaderData().getHeader(HttpHeaders.Names.IF_MODIFIED_SINCE);
+                if (ifModifiedSince != null) {
+                    try {
+                        SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
+                        Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince.getValue());
 
-                // Only compare up to the second because the datetime format we send to the client
-                // does not have milliseconds
-                long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
-                long fileLastModifiedSeconds = file.lastModified() / 1000;
-                if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-                    sendNotModified(ctx);
-                    request.release();
+                        // Only compare up to the second because the datetime format we send to the client
+                        // does not have milliseconds
+                        long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
+                        long fileLastModifiedSeconds = file.lastModified() / 1000;
+                        if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
+                            sendNotModified(ctx);
+                            return;
+                        }
+                    } catch (ParseException ex) {
+                        Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                RandomAccessFile raf;
+                try {
+                    raf = new RandomAccessFile(file, "r");
+                } catch (FileNotFoundException fnfe) {
+                    sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchreq);
                     return;
                 }
-            }
+                long fileLength = raf.length();
 
-            RandomAccessFile raf;
-            try {
-                raf = new RandomAccessFile(file, "r");
-            } catch (FileNotFoundException fnfe) {
-                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, request);
-                return;
-            }
-            long fileLength = raf.length();
+                HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+                HttpHeaders.setContentLength(response, fileLength);
+                setContentTypeHeader(response, file);
+                setDateAndCacheHeaders(response, file);
 
-            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-            HttpHeaders.setContentLength(response, fileLength);
-            setContentTypeHeader(response, file);
-            setDateAndCacheHeaders(response, file);
+                if (torchreq.isKeepAlive()) {
+                    response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+                }
 
-            if (HttpHeaders.isKeepAlive(request)) {
-                response.headers().set(Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-            }
+                // Write the initial line and the header.
+                ctx.write(response);
 
-            // Write the initial line and the header.
-            ctx.write(response);
+                ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
 
-            ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
+                // Write the end marker
+                ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
 
-            // Write the end marker
-            ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
-
-            // Decide whether to close the connection or not.
-            if (!HttpHeaders.isKeepAlive(request)) {
-                // Close the connection when the whole content is written out.
-                lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+                // Decide whether to close the connection or not.
+                if (!torchreq.isKeepAlive()) {
+                    // Close the connection when the whole content is written out.
+                    lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             //Send back not found 404
-            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, request);
+            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchreq);
             return;
         }
 
         ctx.flush();
-        request.release();
     }
 
     /**
@@ -174,6 +181,7 @@ public class ServingFileHandler extends WebResponseHandler {
      * @param file file to extract content type
      */
     private static void setContentTypeHeader(HttpResponse response, File file) throws IOException {
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE,mimeDetector.getMimeByExtension(FilenameUtils.getExtension(file.getName())));
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, mimeDetector.getMimeByExtension(FilenameUtils.getExtension(file.getName())));
     }
+
 }
