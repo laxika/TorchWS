@@ -43,19 +43,8 @@ public class WebpageRequestProcessor extends RequestProcessor {
     @Override
     public void processRequest(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse) {
         try {
-            //Calculating the actual session, if no session data recived, start a new one
-            CookieVariable sessionCookie = torchRequest.getCookieData().getCookie("SESSID");
-
-            SessionManager sessionManager = (SessionManager) ctx.channel().attr(ChannelVariable.SESSION_MANAGER.getVariableKey()).get();
-
-            Session session;
-            if (sessionCookie != null && sessionManager.getSession(sessionCookie.getValue()) != null) {
-                session = sessionManager.getSession(sessionCookie.getValue());
-            } else {
-                session = sessionManager.startNewSession();
-                torchResponse.getCookieData().putCookie(new CookieVariable("SESSID", session.getSessionId(), "/"));
-            }
-
+            Session session = this.getSessionOrCreateIfNotExists(ctx, torchRequest, torchResponse);
+            
             //Instantiate a new WebPage object and handle the request
             WebPage webpage = torchRequest.getRoute().getTarget().newInstance();
 
@@ -128,6 +117,22 @@ public class WebpageRequestProcessor extends RequestProcessor {
         }
 
         return fullresponse;
+    }
+
+    private Session getSessionOrCreateIfNotExists(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse) {
+        CookieVariable sessionCookie = torchRequest.getCookieData().getCookie("SESSID");
+
+        SessionManager sessionManager = (SessionManager) ctx.channel().attr(ChannelVariable.SESSION_MANAGER.getVariableKey()).get();
+
+        Session session;
+        if (sessionCookie != null && sessionManager.getSession(sessionCookie.getValue()) != null) {
+            session = sessionManager.getSession(sessionCookie.getValue());
+        } else {
+            session = sessionManager.startNewSession();
+            torchResponse.getCookieData().putCookie(new CookieVariable("SESSID", session.getSessionId(), "/"));
+        }
+
+        return session;
     }
 
 }
