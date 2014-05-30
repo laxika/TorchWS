@@ -75,10 +75,8 @@ public class FileRequestProcessor extends RequestProcessor {
 
             RandomAccessFile raf = new RandomAccessFile(file, "r");
 
-            long fileLength = raf.length();
-
             HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-            HttpHeaders.setContentLength(response, fileLength);
+            HttpHeaders.setContentLength(response, raf.length());
             setContentTypeHeader(response, file);
             setDateAndCacheHeaders(response, file);
 
@@ -89,7 +87,7 @@ public class FileRequestProcessor extends RequestProcessor {
             // Write the initial line and the header.
             ctx.write(response);
 
-            ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
+            ctx.write(new DefaultFileRegion(raf.getChannel(), 0, raf.length()), ctx.newProgressivePromise());
 
             // Write the end marker
             ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
