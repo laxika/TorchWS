@@ -45,7 +45,6 @@ public class WebpageRequestProcessor extends RequestProcessor {
         try {
             Session session = this.getSessionOrCreateIfNotExists(ctx, torchRequest, torchResponse);
 
-            //Instantiate a new WebPage object and handle the request
             WebPage webpage = torchRequest.getRoute().getTarget().newInstance();
 
             if (webpage instanceof Validable && !((Validable) webpage).validate(torchRequest, torchResponse, session)) {
@@ -57,35 +56,15 @@ public class WebpageRequestProcessor extends RequestProcessor {
                 webpage.handle(torchRequest, torchResponse, session);
             }
 
-            FullHttpResponse fullresponse = this.processTemplate(ctx, torchResponse, webpage);
-
-            handleKeepAliveHeader(torchRequest, fullresponse);
-
-            fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, torchResponse.getContentType());
-
-            //Setting the new cookies
-            for (CookieVariable cookie : torchResponse.getCookieData()) {
-                DefaultCookie realCookie = new DefaultCookie(cookie.getName(), cookie.getValue());
-
-                if (cookie.getPath() != null) {
-                    realCookie.setPath(cookie.getPath());
-                }
-                fullresponse.headers().set(HttpHeaders.Names.SET_COOKIE, ServerCookieEncoder.encode(realCookie));
-            }
-
-            //Setting the headers
-            for (Object pairs : torchResponse.getHeaderData()) {
-                Map.Entry<String, String> obj = (Map.Entry<String, String>) pairs;
-
-                fullresponse.headers().add(obj.getKey(), obj.getValue());
-            }
-
+            FullHttpResponse fullresponse = this.buildFullHttpResponse(ctx, torchRequest, torchResponse, webpage);
+                    
             // Write the response.
             if (!torchRequest.isKeepAlive()) {
                 ctx.write(fullresponse).addListener(ChannelFutureListener.CLOSE);
             } else {
                 ctx.write(fullresponse);
             }
+            
             ctx.flush();
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException | TemplateException ex) {
             Logger.getLogger(WebpageRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
@@ -93,6 +72,49 @@ public class WebpageRequestProcessor extends RequestProcessor {
             // If something went wrong we're better off just denying it
             sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, torchRequest);
         }
+    }
+
+    private Session getSessionOrCreateIfNotExists(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse) {
+        CookieVariable sessionCookie = torchRequest.getCookieData().getCookie(Session.SESSION_COOKIE_NAME);
+
+        SessionManager sessionManager = (SessionManager) ctx.channel().attr(ChannelVariable.SESSION_MANAGER.getVariableKey()).get();
+
+        Session session;
+        if (sessionCookie != null && sessionManager.getSession(sessionCookie.getValue()) != null) {
+            session = sessionManager.getSession(sessionCookie.getValue());
+        } else {
+            session = sessionManager.startNewSession();
+            torchResponse.getCookieData().putCookie(new CookieVariable(Session.SESSION_COOKIE_NAME, session.getSessionId(), "/"));
+        }
+
+        return session;
+    }
+
+    private FullHttpResponse buildFullHttpResponse(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse, WebPage webpage) throws IOException, TemplateException, IllegalArgumentException, IllegalAccessException {
+        FullHttpResponse fullresponse = this.processTemplate(ctx, torchResponse, webpage);
+
+        handleKeepAliveHeader(torchRequest, fullresponse);
+
+        fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, torchResponse.getContentType());
+
+        //Setting the new cookies
+        for (CookieVariable cookie : torchResponse.getCookieData()) {
+            DefaultCookie realCookie = new DefaultCookie(cookie.getName(), cookie.getValue());
+
+            if (cookie.getPath() != null) {
+                realCookie.setPath(cookie.getPath());
+            }
+            fullresponse.headers().set(HttpHeaders.Names.SET_COOKIE, ServerCookieEncoder.encode(realCookie));
+        }
+
+        //Setting the headers
+        for (Object pairs : torchResponse.getHeaderData()) {
+            Map.Entry<String, String> obj = (Map.Entry<String, String>) pairs;
+
+            fullresponse.headers().add(obj.getKey(), obj.getValue());
+        }
+
+        return fullresponse;
     }
 
     private FullHttpResponse processTemplate(ChannelHandlerContext ctx, TorchHttpResponse torchResponse, WebPage webpage) throws IOException, TemplateException, IllegalArgumentException, IllegalAccessException {
@@ -115,22 +137,6 @@ public class WebpageRequestProcessor extends RequestProcessor {
         }
 
         return fullresponse;
-    }
-
-    private Session getSessionOrCreateIfNotExists(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse) {
-        CookieVariable sessionCookie = torchRequest.getCookieData().getCookie(Session.SESSION_COOKIE_NAME);
-
-        SessionManager sessionManager = (SessionManager) ctx.channel().attr(ChannelVariable.SESSION_MANAGER.getVariableKey()).get();
-
-        Session session;
-        if (sessionCookie != null && sessionManager.getSession(sessionCookie.getValue()) != null) {
-            session = sessionManager.getSession(sessionCookie.getValue());
-        } else {
-            session = sessionManager.startNewSession();
-            torchResponse.getCookieData().putCookie(new CookieVariable(Session.SESSION_COOKIE_NAME, session.getSessionId(), "/"));
-        }
-
-        return session;
     }
 
 }
