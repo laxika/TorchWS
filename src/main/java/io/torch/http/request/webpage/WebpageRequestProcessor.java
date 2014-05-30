@@ -120,7 +120,7 @@ public class WebpageRequestProcessor extends RequestProcessor {
     }
 
     private Session getSessionOrCreateIfNotExists(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse) {
-        CookieVariable sessionCookie = torchRequest.getCookieData().getCookie("SESSID");
+        CookieVariable sessionCookie = torchRequest.getCookieData().getCookie(Session.SESSION_COOKIE_NAME);
 
         SessionManager sessionManager = (SessionManager) ctx.channel().attr(ChannelVariable.SESSION_MANAGER.getVariableKey()).get();
 
@@ -129,7 +129,7 @@ public class WebpageRequestProcessor extends RequestProcessor {
             session = sessionManager.getSession(sessionCookie.getValue());
         } else {
             session = sessionManager.startNewSession();
-            torchResponse.getCookieData().putCookie(new CookieVariable("SESSID", session.getSessionId(), "/"));
+            torchResponse.getCookieData().putCookie(new CookieVariable(Session.SESSION_COOKIE_NAME, session.getSessionId(), "/"));
         }
 
         return session;
