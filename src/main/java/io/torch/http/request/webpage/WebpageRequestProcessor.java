@@ -59,8 +59,6 @@ public class WebpageRequestProcessor extends RequestProcessor {
             FullHttpResponse fullresponse = this.buildFullHttpResponse(ctx, torchRequest, torchResponse, webpage);
 
             this.writeResponse(ctx, torchRequest, fullresponse);
-            
-            ctx.flush();
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IOException | TemplateException ex) {
             Logger.getLogger(WebpageRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
 
@@ -135,9 +133,9 @@ public class WebpageRequestProcessor extends RequestProcessor {
 
     private void writeResponse(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, FullHttpResponse fullresponse) {
         if (!torchRequest.isKeepAlive()) {
-            ctx.write(fullresponse).addListener(ChannelFutureListener.CLOSE);
+            ctx.writeAndFlush(fullresponse).addListener(ChannelFutureListener.CLOSE);
         } else {
-            ctx.write(fullresponse);
+            ctx.writeAndFlush(fullresponse);
         }
     }
 
