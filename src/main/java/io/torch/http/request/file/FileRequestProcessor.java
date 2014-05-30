@@ -18,6 +18,7 @@ import io.torch.http.request.RequestProcessor;
 import io.torch.http.request.TorchHttpRequest;
 import io.torch.http.response.TorchHttpResponse;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.ParseException;
@@ -62,7 +63,7 @@ public class FileRequestProcessor extends RequestProcessor {
             if (ifModifiedSince != null) {
                 try {
                     Date lastModificationDate = dateFormatter.parse(ifModifiedSince.getValue());
-                    
+
                     if (this.isFileModified(lastModificationDate, file)) {
                         this.sendNotModified(ctx);
 
@@ -73,36 +74,58 @@ public class FileRequestProcessor extends RequestProcessor {
                 }
             }
 
-            RandomAccessFile raf = new RandomAccessFile(file, "r");
-
-            HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-            HttpHeaders.setContentLength(response, raf.length());
-            setContentTypeHeader(response, file);
-            setDateAndCacheHeaders(response, file);
-
-            if (torchRequest.isKeepAlive()) {
-                response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-            }
-
-            // Write the initial line and the header.
-            ctx.write(response);
-
-            ctx.write(new DefaultFileRegion(raf.getChannel(), 0, raf.length()), ctx.newProgressivePromise());
-
-            // Write the end marker
-            ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
-
-            // Decide whether to close the connection or not.
-            if (!torchRequest.isKeepAlive()) {
-                // Close the connection when the whole content is written out.
-                lastContentFuture.addListener(ChannelFutureListener.CLOSE);
-            }
-
-            ctx.flush();
+            this.writeHeaders(ctx, file, torchRequest);
+            this.writeData(ctx, file, torchRequest);
         } catch (IOException ex) {
             Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
 
             sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
+        }
+    }
+
+    private boolean validatePath(File file) {
+        try {
+            String requestPath = file.getCanonicalPath();
+
+            if (!requestPath.startsWith(PUBLIC_PATH)) {
+                return false;
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void writeHeaders(ChannelHandlerContext ctx, File file, TorchHttpRequest torchRequest) throws IOException {
+        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+
+        this.setHeaders(response, file, torchRequest);
+
+        ctx.write(response);
+    }
+
+    private void writeData(ChannelHandlerContext ctx, File file, TorchHttpRequest torchRequest) throws IOException {
+        RandomAccessFile raf = new RandomAccessFile(file, "r");
+
+        ctx.write(new DefaultFileRegion(raf.getChannel(), 0, raf.length()), ctx.newProgressivePromise());
+
+        // Write the end marker
+        ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+
+        if (!torchRequest.isKeepAlive()) {
+            lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+        }
+    }
+
+    private void setHeaders(HttpResponse response, File file, TorchHttpRequest torchRequest) throws IOException {
+        HttpHeaders.setContentLength(response, file.length());
+        setContentTypeHeader(response, file);
+        setDateAndCacheHeaders(response, file);
+
+        if (torchRequest.isKeepAlive()) {
+            response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
         }
     }
 
@@ -143,21 +166,6 @@ public class FileRequestProcessor extends RequestProcessor {
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, mimeDetector.getMimeByExtension(FilenameUtils.getExtension(file.getName())));
     }
 
-    private boolean validatePath(File file) {
-        try {
-            String requestPath = file.getCanonicalPath();
-
-            if (!requestPath.startsWith(PUBLIC_PATH)) {
-                return false;
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-
-        return true;
-    }
-    
     private boolean isFileModified(Date lastModified, File file) {
         return lastModified.getTime() / 1000 == file.lastModified() / 1000;
     }
