@@ -18,7 +18,6 @@ import io.torch.http.request.RequestProcessor;
 import io.torch.http.request.TorchHttpRequest;
 import io.torch.http.response.TorchHttpResponse;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.ParseException;
@@ -39,9 +38,9 @@ public class FileRequestProcessor extends RequestProcessor {
 
     private static final File PUBLIC_FOLDER = new File("public");
     private static final String PUBLIC_PATH = PUBLIC_FOLDER.getAbsolutePath();
-    
+
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-    
+
     static {
         dateFormatter.setTimeZone(TimeZone.getTimeZone(HTTP_DATE_GMT_TIMEZONE));
     }
@@ -55,21 +54,18 @@ public class FileRequestProcessor extends RequestProcessor {
 
             return;
         }
-        
+
         try {
             // Cache Validation
             HeaderVariable ifModifiedSince = torchRequest.getHeaderData().getHeader(HttpHeaders.Names.IF_MODIFIED_SINCE);
-            
+
             if (ifModifiedSince != null) {
                 try {
-                    Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince.getValue());
+                    Date lastModificationDate = dateFormatter.parse(ifModifiedSince.getValue());
+                    
+                    if (this.isFileModified(lastModificationDate, file)) {
+                        this.sendNotModified(ctx);
 
-                    // Only compare up to the second because the datetime format we send to the client
-                    // does not have milliseconds
-                    long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
-                    long fileLastModifiedSeconds = file.lastModified() / 1000;
-                    if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-                        sendNotModified(ctx);
                         return;
                     }
                 } catch (ParseException ex) {
@@ -78,7 +74,7 @@ public class FileRequestProcessor extends RequestProcessor {
             }
 
             RandomAccessFile raf = new RandomAccessFile(file, "r");
-            
+
             long fileLength = raf.length();
 
             HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
@@ -107,7 +103,7 @@ public class FileRequestProcessor extends RequestProcessor {
             ctx.flush();
         } catch (IOException ex) {
             Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
-            
+
             sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
         }
     }
@@ -118,22 +114,12 @@ public class FileRequestProcessor extends RequestProcessor {
      *
      * @param ctx Context
      */
-    private static void sendNotModified(ChannelHandlerContext ctx) {
+    private void sendNotModified(ChannelHandlerContext ctx) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_MODIFIED);
-        
-        setDateHeader(response);
 
-        // Close the connection as soon as the error message is sent.
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-    }
-
-    /**
-     * Sets the Date header for the HTTP response
-     *
-     * @param response HTTP response
-     */
-    private static void setDateHeader(FullHttpResponse response) {
         response.headers().set(HttpHeaders.Names.DATE, dateFormatter.format(new Date(System.currentTimeMillis())));
+
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
     }
 
     /**
@@ -172,6 +158,10 @@ public class FileRequestProcessor extends RequestProcessor {
         }
 
         return true;
+    }
+    
+    private boolean isFileModified(Date lastModified, File file) {
+        return lastModified.getTime() / 1000 == file.lastModified() / 1000;
     }
 
 }
