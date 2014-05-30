@@ -25,7 +25,7 @@ public class HttpRequestValidator extends ChannelInboundHandlerAdapter {
 
         //Check that the request is successfull
         if (!request.getDecoderResult().isSuccess()) {
-            FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("404 Not found!", CharsetUtil.UTF_8));
+            FullHttpResponse fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Bad request!", CharsetUtil.UTF_8));
 
             if (HttpHeaders.isKeepAlive(request)) {
                 // Add 'Content-Length' header only for a keep-alive connection.

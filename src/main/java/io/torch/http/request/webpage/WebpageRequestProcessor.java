@@ -41,10 +41,10 @@ public class WebpageRequestProcessor extends RequestProcessor {
     }
 
     @Override
-    public void processRequest(ChannelHandlerContext ctx, TorchHttpRequest torchreq, TorchHttpResponse response) {
+    public void processRequest(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse) {
         try {
             //Calculating the actual session, if no session data recived, start a new one
-            CookieVariable sessionCookie = torchreq.getCookieData().getCookie("SESSID");
+            CookieVariable sessionCookie = torchRequest.getCookieData().getCookie("SESSID");
 
             SessionManager sessionManager = (SessionManager) ctx.channel().attr(ChannelVariable.SESSION_MANAGER.getVariableKey()).get();
 
@@ -53,46 +53,46 @@ public class WebpageRequestProcessor extends RequestProcessor {
                 session = sessionManager.getSession(sessionCookie.getValue());
             } else {
                 session = sessionManager.startNewSession();
-                response.getCookieData().putCookie(new CookieVariable("SESSID", session.getSessionId(), "/"));
+                torchResponse.getCookieData().putCookie(new CookieVariable("SESSID", session.getSessionId(), "/"));
             }
 
             //Instantiate a new WebPage object and handle the request
-            WebPage webpage = torchreq.getRoute().getTarget().newInstance();
+            WebPage webpage = torchRequest.getRoute().getTarget().newInstance();
 
             if (webpage instanceof Validable) {
-                if (!((Validable) webpage).validate(torchreq, response, session)) {
-                    sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, torchreq);
+                if (!((Validable) webpage).validate(torchRequest, torchResponse, session)) {
+                    sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, torchRequest);
                     return;
                 }
             }
 
             synchronized (session) {
-                webpage.handle(torchreq, response, session);
+                webpage.handle(torchRequest, torchResponse, session);
             }
 
             TemplateManager templateManager = (TemplateManager) ctx.channel().attr(ChannelVariable.TEMPLATE_MANAGER.getVariableKey()).get();
             FullHttpResponse fullresponse;
-            if (response.getStatus() instanceof ServerErrorResponseStatus || response.getStatus() instanceof ClientErrorResponseStatus) {
-                if (templateManager.isTemplateExist("error/" + response.getStatus().getStatusCode() + ".tpl")) {
-                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate("error/" + response.getStatus().getStatusCode() + ".tpl", null), CharsetUtil.UTF_8));
+            if (torchResponse.getStatus() instanceof ServerErrorResponseStatus || torchResponse.getStatus() instanceof ClientErrorResponseStatus) {
+                if (templateManager.isTemplateExist("error/" + torchResponse.getStatus().getStatusCode() + ".tpl")) {
+                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate("error/" + torchResponse.getStatus().getStatusCode() + ".tpl", null), CharsetUtil.UTF_8));
                 } else {
-                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer("Error " + response.getStatus().getStatusCode(), CharsetUtil.UTF_8));
+                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer("Error " + torchResponse.getStatus().getStatusCode(), CharsetUtil.UTF_8));
                 }
             } else {
                 //Generate the template
                 if (webpage.getClass().isAnnotationPresent(Templateable.class)) {
-                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate(webpage.getClass().getAnnotation(Templateable.class).path(), templateRootLocator.locateTemplateRoot(webpage)), CharsetUtil.UTF_8));
+                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer(templateManager.processTemplate(webpage.getClass().getAnnotation(Templateable.class).path(), templateRootLocator.locateTemplateRoot(webpage)), CharsetUtil.UTF_8));
                 } else {
-                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(response.getStatus().getStatusCode()), Unpooled.copiedBuffer(response.getContent(), CharsetUtil.UTF_8));
+                    fullresponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(torchResponse.getStatus().getStatusCode()), Unpooled.copiedBuffer(torchResponse.getContent(), CharsetUtil.UTF_8));
                 }
             }
 
-            handleKeepAliveHeader(torchreq, fullresponse);
+            handleKeepAliveHeader(torchRequest, fullresponse);
 
-            fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, response.getContentType());
+            fullresponse.headers().set(HttpHeaders.Names.CONTENT_TYPE, torchResponse.getContentType());
 
             //Setting the new cookies
-            for (CookieVariable cookie : response.getCookieData()) {
+            for (CookieVariable cookie : torchResponse.getCookieData()) {
                 DefaultCookie realCookie = new DefaultCookie(cookie.getName(), cookie.getValue());
 
                 if (cookie.getPath() != null) {
@@ -102,14 +102,14 @@ public class WebpageRequestProcessor extends RequestProcessor {
             }
 
             //Setting the headers
-            for (Object pairs : response.getHeaderData()) {
+            for (Object pairs : torchResponse.getHeaderData()) {
                 Map.Entry<String, String> obj = (Map.Entry<String, String>) pairs;
 
                 fullresponse.headers().add(obj.getKey(), obj.getValue());
             }
 
             // Write the response.
-            if (!torchreq.isKeepAlive()) {
+            if (!torchRequest.isKeepAlive()) {
                 ctx.write(fullresponse).addListener(ChannelFutureListener.CLOSE);
             } else {
                 ctx.write(fullresponse);
@@ -119,7 +119,7 @@ public class WebpageRequestProcessor extends RequestProcessor {
             Logger.getLogger(WebpageRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
 
             // If something went wrong we're better off just denying it
-            sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, torchreq);
+            sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, torchRequest);
         }
     }
 

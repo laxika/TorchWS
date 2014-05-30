@@ -44,27 +44,27 @@ public class FileRequestProcessor extends RequestProcessor {
     private static final String PUBLIC_PATH = PUBLIC_FOLDER.getAbsolutePath();
 
     @Override
-    public void processRequest(ChannelHandlerContext ctx, TorchHttpRequest torchreq, TorchHttpResponse torchresponse) {
-        File file = new File(PUBLIC_FOLDER, torchreq.getUri());
+    public void processRequest(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse) {
+        File file = new File(PUBLIC_FOLDER, torchRequest.getUri());
 
         // Validate path
         try {
             String requestPath = file.getCanonicalPath();
             if (!requestPath.startsWith(PUBLIC_PATH)) {
                 //Send back not found 404
-                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchreq);
+                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
                 return;
             }
         } catch (IOException e) {
             // If something went wrong we're better off just denying it
-            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchreq);
+            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
             return;
         }
 
         if (file.exists() && file.isFile()) {
             try {
                 // Cache Validation
-                HeaderVariable ifModifiedSince = torchreq.getHeaderData().getHeader(HttpHeaders.Names.IF_MODIFIED_SINCE);
+                HeaderVariable ifModifiedSince = torchRequest.getHeaderData().getHeader(HttpHeaders.Names.IF_MODIFIED_SINCE);
                 if (ifModifiedSince != null) {
                     try {
                         SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
@@ -87,7 +87,7 @@ public class FileRequestProcessor extends RequestProcessor {
                 try {
                     raf = new RandomAccessFile(file, "r");
                 } catch (FileNotFoundException fnfe) {
-                    sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchreq);
+                    sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
                     return;
                 }
                 long fileLength = raf.length();
@@ -97,7 +97,7 @@ public class FileRequestProcessor extends RequestProcessor {
                 setContentTypeHeader(response, file);
                 setDateAndCacheHeaders(response, file);
 
-                if (torchreq.isKeepAlive()) {
+                if (torchRequest.isKeepAlive()) {
                     response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
                 }
 
@@ -110,7 +110,7 @@ public class FileRequestProcessor extends RequestProcessor {
                 ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
 
                 // Decide whether to close the connection or not.
-                if (!torchreq.isKeepAlive()) {
+                if (!torchRequest.isKeepAlive()) {
                     // Close the connection when the whole content is written out.
                     lastContentFuture.addListener(ChannelFutureListener.CLOSE);
                 }
@@ -119,7 +119,7 @@ public class FileRequestProcessor extends RequestProcessor {
             }
         } else {
             //Send back not found 404
-            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchreq);
+            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
             return;
         }
 
