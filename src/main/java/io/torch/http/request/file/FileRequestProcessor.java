@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -79,13 +77,8 @@ public class FileRequestProcessor extends RequestProcessor {
                 }
             }
 
-            RandomAccessFile raf;
-            try {
-                raf = new RandomAccessFile(file, "r");
-            } catch (FileNotFoundException fnfe) {
-                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
-                return;
-            }
+            RandomAccessFile raf = new RandomAccessFile(file, "r");
+            
             long fileLength = raf.length();
 
             HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
@@ -110,11 +103,13 @@ public class FileRequestProcessor extends RequestProcessor {
                 // Close the connection when the whole content is written out.
                 lastContentFuture.addListener(ChannelFutureListener.CLOSE);
             }
+
+            ctx.flush();
         } catch (IOException ex) {
             Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            
+            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
         }
-
-        ctx.flush();
     }
 
     /**
