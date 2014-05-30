@@ -10,7 +10,11 @@ public class ReadOnlyRouteDataStorage implements Iterable<RouteVariable> {
     private HashMap<String, RouteVariable> urlVariableStorage = new HashMap<>();
 
     public ReadOnlyRouteDataStorage(Route route, String uri) {
-        this.urlVariableStorage = route.calculateVariablesValuesFromUrl(uri);
+        if(route != null) {
+            this.urlVariableStorage = route.calculateVariablesValuesFromUrl(uri);
+        } else {
+            this.urlVariableStorage = new HashMap<>();
+        }
     }
 
     public RouteVariable getVariable(String name) {
