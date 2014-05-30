@@ -6,7 +6,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.DefaultFileRegion;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponse;
@@ -47,17 +46,9 @@ public class FileRequestProcessor extends RequestProcessor {
     public void processRequest(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse) {
         File file = new File(PUBLIC_FOLDER, torchRequest.getUri());
 
-        // Validate path
-        try {
-            String requestPath = file.getCanonicalPath();
-            if (!requestPath.startsWith(PUBLIC_PATH)) {
-                //Send back not found 404
-                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
-                return;
-            }
-        } catch (IOException e) {
-            // If something went wrong we're better off just denying it
+        if(!this.validatePath(file)) {
             sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, torchRequest);
+            
             return;
         }
 
@@ -182,6 +173,21 @@ public class FileRequestProcessor extends RequestProcessor {
      */
     private static void setContentTypeHeader(HttpResponse response, File file) throws IOException {
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, mimeDetector.getMimeByExtension(FilenameUtils.getExtension(file.getName())));
+    }
+    
+    private boolean validatePath(File file) {
+        try {
+            String requestPath = file.getCanonicalPath();
+            
+            if (!requestPath.startsWith(PUBLIC_PATH)) {
+                return false;
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(FileRequestProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+        
+        return true;
     }
 
 }
