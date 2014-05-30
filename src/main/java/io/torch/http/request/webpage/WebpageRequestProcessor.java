@@ -44,15 +44,13 @@ public class WebpageRequestProcessor extends RequestProcessor {
     public void processRequest(ChannelHandlerContext ctx, TorchHttpRequest torchRequest, TorchHttpResponse torchResponse) {
         try {
             Session session = this.getSessionOrCreateIfNotExists(ctx, torchRequest, torchResponse);
-            
+
             //Instantiate a new WebPage object and handle the request
             WebPage webpage = torchRequest.getRoute().getTarget().newInstance();
 
-            if (webpage instanceof Validable) {
-                if (!((Validable) webpage).validate(torchRequest, torchResponse, session)) {
-                    sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, torchRequest);
-                    return;
-                }
+            if (webpage instanceof Validable && !((Validable) webpage).validate(torchRequest, torchResponse, session)) {
+                sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, torchRequest);
+                return;
             }
 
             synchronized (session) {
